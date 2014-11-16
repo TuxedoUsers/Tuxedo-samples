@@ -14,7 +14,7 @@ To get started using Tuxedo, you need to download the Tuxedo installer from the 
 
 The download site is: http://www.oracle.com/technetwork/middleware/tuxedo/downloads/index.html
 
-Gary Jones has graciously create a baseline VirtualBox VM that we can use as starting point for sample development.  It can be downloaded here[http://littles.name/tuxedodemos/TuxedoSamplesVM/].  I think it makes sense to use this as a starting point, and as samples are developed, to assume the environment provided by this VM.  That means if you want to add an Oracle product that prohibits redistribution such as Tuxedo or Oracle Database, you can provide silent install answer files that match up with the configuration of this VM to make life easier for other users.
+Gary Jones has graciously create a baseline VirtualBox VM that we can use as starting point for sample development.  It can be downloaded [here](http://littles.name/tuxedodemos/TuxedoSamplesVM).  I think it makes sense to use this as a starting point, and as samples are developed, to assume the environment provided by this VM.  That means if you want to add an Oracle product that prohibits redistribution such as Tuxedo or Oracle Database, you can provide silent install answer files that match up with the configuration of this VM to make life easier for other users.
 
 ## Developing in C or C++
 If you want to develop in C or C++ under Windows, you will likely need Microsoft Visual Studio Express 2010 which can be downloaded from:  http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4   Linux users can just use the standard gcc compiler and libraries.
