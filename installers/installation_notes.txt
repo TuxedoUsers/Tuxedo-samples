@@ -1,0 +1,13 @@
+Database password: welcome1
+
+Created as non-container database: sid is orcl
+
+Database Configuration Assistant
+	Global Database Name:		orcl.localdomain
+	System Identifier (SID):	orcl
+	Server Parameter File name:	/home/oracle/app/oracle/product/12.1.0/dbhome_1/dbs/spfileorcl.ora
+
+EM Database Express URL:	https://localhost:5500/em
+
+
+	

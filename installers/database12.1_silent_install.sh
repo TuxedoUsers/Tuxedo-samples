@@ -10,36 +10,31 @@
 #
 # Created by Todd Little  5-Dec-2014
 #
-# Perform pre-install step(s) -  These next steps require root access.  So either enable sudo for
-# the account running this script, or execute these statements as root.
+# This script assume the following two steps have been done.  If not, please perform them before running
+# this script.  These command run the Oracle Database preinstallation RPM to make sure the environment is
+# set to run Oracle Database.
 #
-sudo yum-config-manager --enable ol7_addons*
-sudo yum install oracle-rdbms-server-12cR1-preinstall
+#sudo yum-config-manager --enable ol7_addons*
+#sudo yum install oracle-rdbms-server-12cR1-preinstall
 #
 cd ~/Downloads
 # Unzip the downloaded installation kit
-unzip -qq linuxamd64_12102_database_1of2.zip
-unzip -qq linuxamd64_12102_database_2of2.zip
+#### unzip -qq linuxamd64_12102_database_1of2.zip
+#### unzip -qq linuxamd64_12102_database_2of2.zip
 # Run the installer in silent mode
 #
-# Installs all of Tuxedo including samples without LDAP support.  tlisten password is "oracle"
-# Tuxedo home is ~/tuxhome
-# TUXDIR is ~/tuxhome/tuxedo12.1.3.0.0
-./Disk1/install/runInstaller -responseFile ~/Downloads/tuxedo12.1.3.rsp -silent -waitforcompletion
+# Installs all of Oracle Database setting up a pluggable database pdorcl in container database orcl.  Database
+# password is welcome1.  ORACLE_HOME for the database is?
 #
+./database/runInstaller -responseFile ~/Downloads/database12.1.0.2.0.rsp -silent -waitforcompletion
+#
+# Do the root commands need to be executed?  Do them anyway.
+sudo sh /home/oracle/app/oraInventory/orainstRoot.sh
+sudo sh /home/oracle/app/oracle/product/12.1.0/dbhome_1/root.sh
+# Run the configuration tool
+/home/oracle/app/oracle/product/12.1.0/dbhome_1/cfgtoollogs/configToolAllCommands RESPONSE_FILE=~/Downloads/database12.1_config.rsp
 # Remove the installer, but not the kit or response file
-rm -Rf Disk1
-echo "Installation done, starting rolling patch"
-#
-# Install rolling patch
-export ORACLE_HOME=~/tuxhome
-unzip -qq $PATCH
-# Get the patch zip file name from the patch kit name, get everything before the first _
-zipname=`echo "$PATCH" | cut -d'_' -f1`
-# Strip of the p at the beginning
-zipname=${zipname:1:20}
-$ORACLE_HOME/OPatch/opatch apply $zipname.zip
-# Clean up patch files
-rm -f $zipname.zip patchlev README.txt releasenotes.txt
+#### rm -Rf database
+echo "Installation and Configuration done"
 
 
