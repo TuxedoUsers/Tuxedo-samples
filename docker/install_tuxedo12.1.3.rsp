@@ -32,7 +32,7 @@ RESPONSEFILE_VERSION=2.2.1.0.0
 #Description: Unix group to be set for the inventory directory. Valid only in Unix platforms.
 #Example: UNIX_GROUP_NAME = "install"
 #-------------------------------------------------------------------------------
-UNIX_GROUP_NAME="oracle"
+UNIX_GROUP_NAME="tuxtest"
 
 #-------------------------------------------------------------------------------
 #Name       : FROM_LOCATION
@@ -40,7 +40,7 @@ UNIX_GROUP_NAME="oracle"
 #Description: Complete path to the products.xml.
 #Example: FROM_LOCATION = "../stage/products.xml"
 #-------------------------------------------------------------------------------
-FROM_LOCATION="/u01/oracle/Disk1/stage/products.xml"
+FROM_LOCATION="/home/tuxtest/temp/Disk1/stage/products.xml"
 
 #-------------------------------------------------------------------------------
 #Name       : FROM_LOCATION_CD_LABEL
@@ -56,7 +56,7 @@ FROM_LOCATION_CD_LABEL=<Value Unspecified>
 #Description: Complete path of the Oracle Home.
 #Example: ORACLE_HOME = "C:\OHOME1"
 #-------------------------------------------------------------------------------
-ORACLE_HOME="/u01/oracle/tuxedoHome"
+ORACLE_HOME="/home/tuxtest/tuxedoHome"
 
 #-------------------------------------------------------------------------------
 #Name       : ORACLE_BASE
@@ -456,7 +456,7 @@ CONFIG_TLISTEN=true
 #Component  : tuxedoServerBase
 #-------------------------------------------------------------------------------
 
-TLISTEN_PASSWORD="welcome1"
+TLISTEN_PASSWORD="oracle"
 
 #-------------------------------------------------------------------------------
 #Name       : SSL_PARAMETERS

@@ -4,7 +4,6 @@
 # Download tuxedo121300_64_Linux_01_x86.zip from http://www.oracle.com/technetwork/middleware/tuxedo/downloads/index.html
 # and put it in the same dir as this Dockerfile
 #
-# https://github.com/weblogic-community/weblogic-docker
 #
 
 # Pull base image
@@ -16,31 +15,30 @@ MAINTAINER Todd Little <toddjlittle@gmail.com>
 RUN yum -y install unzip
 RUN yum -y install gcc
 
-# Create the installation directory tree and user oracle
-RUN mkdir /u01; chmod a+x /u01; chmod a+r /u01
-RUN useradd -b /home -m -s /bin/bash oracle
-RUN echo oracle:welcome1 | chpasswd
-RUN echo root:oracle | chpasswd
+# Create the installation directory tree and user tuxtest
+#RUN mkdir /u01; chmod a+x /u01; chmod a+r /u01
+RUN useradd -b /home -m -s /bin/bash tuxtest
+RUN echo tuxtest:tuxtest | chpasswd
+RUN echo root:samplesvm | chpasswd
 
-ADD tuxedo121300_64_Linux_01_x86.zip /u01/
-ADD install_tuxedo12.1.3.rsp /u01/
-ADD simpapp_runme.sh /home/oracle/
-ADD start_tlisten.sh /home/oracle/
+ADD tuxedo121300_64_Linux_01_x86.zip /home/tuxtest/temp/
+ADD install_tuxedo12.1.3.rsp /home/tuxtest/temp/
+ADD simpapp_runme.sh /home/tuxtest/
+ADD start_tlisten.sh /home/tuxtest/
 
-RUN chown oracle:oracle -R /u01
-RUN chown oracle:oracle -R /home/oracle
+#RUN chown tuxtest:tuxtest -R /u01
+RUN chown tuxtest:tuxtest -R /home/tuxtest
 WORKDIR /u01
-USER oracle
+USER tuxtest
 
 # Install Tuxedo, SALT, and TSAM Agent
-RUN unzip /u01/tuxedo121300_64_Linux_01_x86.zip -d /u01/oracle/
-WORKDIR /u01/oracle/Disk1/install
-RUN ./runInstaller -silent -waitforcompletion -responseFile /u01/install_tuxedo12.1.3.rsp
-RUN rm -Rf /u01/oracle/Disk1
-RUN rm -f /u01/install_tuxedo12.1.3.rsp /u01/tuxedo121300_64_Linux_01_x86.zip
-USER root
-RUN sh /u01/app/oraInventory/orainstRoot.sh 
-ENV TUXDIR /u01/oracle/tuxedoHome/tuxedo12.1.3.0.0
+RUN unzip /home/tuxtest/temp/tuxedo121300_64_Linux_01_x86.zip -d /home/tuxtest/temp/
+WORKDIR /home/tuxtest/temp/Disk1/install
+RUN ./runInstaller -silent -waitforcompletion -responseFile /home/tuxtest/temp/install_tuxedo12.1.3.rsp
+RUN rm -Rf /home/tuxtest/temp
+#USER root
+#RUN sh /u01/app/oraInventory/orainstRoot.sh 
+ENV TUXDIR /home/tuxtest/tuxedoHome/tuxedo12.1.3.0.0
 
 #
 # Configure network ports
@@ -49,8 +47,8 @@ ENV TUXDIR /u01/oracle/tuxedoHome/tuxedo12.1.3.0.0
 # WSL		5020
 EXPOSE 5001 5002 5010 5020
 
-USER oracle
-WORKDIR /home/oracle
+USER tuxtest
+WORKDIR /home/tuxtest
 # Start tlisten so the machine can be managed
 #CMD ["sh","start_tlisten.sh 5001 5002 && /usr/bin/bash"]
 

@@ -21,10 +21,13 @@ tmshutdown -y &>/dev/null
 rm -Rf simpcl simpserv tuxconfig ubbsimple ULOG.*
 
 # Create environment setup script setenv.sh
-cat >setenv.sh << EndOfFile
-source  ${TUXDIR}/tux.env
 export HOSTNAME=`hostname`
 export APPDIR=`pwd`
+
+cat >setenv.sh << EndOfFile
+source  ${TUXDIR}/tux.env
+export HOSTNAME=${HOSTNAME}
+export APPDIR=${APPDIR}
 export TUXCONFIG=${APPDIR}/tuxconfig
 export IPCKEY=112233
 EndOfFile
