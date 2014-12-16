@@ -17,7 +17,8 @@ RUN yum -y install gcc
 
 # Create the installation directory tree and user tuxtest
 #RUN mkdir /u01; chmod a+x /u01; chmod a+r /u01
-RUN useradd -b /home -m -s /bin/bash tuxtest
+RUN groupadd -g 1000 tuxtest
+RUN useradd -b /home -m -g tuxtest -u 1000 -s /bin/bash tuxtest
 RUN echo tuxtest:tuxtest | chpasswd
 RUN echo root:samplesvm | chpasswd
 
@@ -45,7 +46,9 @@ ENV TUXDIR /home/tuxtest/tuxedoHome/tuxedo12.1.3.0.0
 # tlisten	nlsaddr:5001  jmx:5002
 # SALT 		http:5010
 # WSL		5020
-EXPOSE 5001 5002 5010 5020
+#EXPOSE 5001 5002 5010 5020
+USER root
+RUN yum -y install bind-utils
 
 USER tuxtest
 WORKDIR /home/tuxtest

@@ -21,7 +21,7 @@ fi
 
 echo "====================="
 
-docker build -t oracle/tuxedo .
+docker build -t oracle/tuxedo tuxedo.Dockerfile
 
 echo ""
 echo "Tuxedo Docker Container is ready to be used. To start, run 'dockTuxedo.sh'"

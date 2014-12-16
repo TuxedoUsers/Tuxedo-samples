@@ -26,11 +26,15 @@ echo "Using Tuxedo installer $INSTALLER"
 # Unzip the downloaded installation kit
 unzip -qq $INSTALLER
 # Run the installer in silent mode
+# 
+# Need to create oraInst.loc first:
+echo "inventory_loc=/home/tuxtest/oraInventory" > oraInst.loc
+echo "inst_group=tuxtest" >> oraInst.loc
 #
 # Installs all of Tuxedo including samples without LDAP support.  tlisten password is "oracle"
 # Tuxedo home is ~/tuxhome
 # TUXDIR is ~/tuxhome/tuxedo12.1.3.0.0
-./Disk1/install/runInstaller -responseFile ~/Downloads/tuxedo12.1.3.rsp -silent -waitforcompletion
+./Disk1/install/runInstaller -invPtrLoc /home/tuxtest/Downloads/oraInst.loc -responseFile ~/Downloads/tuxedo12.1.3.rsp -silent -waitforcompletion
 #
 # Remove the installer, but not the kit or response file
 rm -Rf Disk1
@@ -43,7 +47,7 @@ unzip -qq $PATCH
 zipname=`echo "$PATCH" | cut -d'_' -f1`
 # Strip of the p at the beginning
 zipname=${zipname:1:20}
-$ORACLE_HOME/OPatch/opatch apply $zipname.zip
+$ORACLE_HOME/OPatch/opatch apply -invPtrLoc /home/tuxtest/Downloads/oraInst.loc $zipname.zip
 # Clean up patch files
 rm -f $zipname.zip patchlev README.txt releasenotes.txt
 
