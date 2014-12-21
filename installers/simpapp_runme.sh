@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Shell script to build and run simpapp.  It assume TUXDIR has been set, or that 
-# Tuxedo has been installed to: ~/tuxhome/tuxedo12.1.3.0.0   If not, invoke 
+# Tuxedo has been installed to: ~/tuxHome/tuxedo12.1.3.0.0   If not, invoke 
 # this script with a single argument indicating the location of TUXDIR.
 #
 # Author: Todd Little
@@ -13,7 +13,7 @@ if [ ! -z "$1" ]
 	export TUXDIR=$1
 elif [ -z "$TUXDIR" ]
     then
-	export TUXDIR=~/tuxhome/tuxedo12.1.3.0.0
+	export TUXDIR=~/tuxHome/tuxedo12.1.3.0.0
 fi
 
 # clean up from any previous run

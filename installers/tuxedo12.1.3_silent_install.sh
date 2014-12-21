@@ -32,8 +32,8 @@ echo "inventory_loc=/home/tuxtest/oraInventory" > oraInst.loc
 echo "inst_group=tuxtest" >> oraInst.loc
 #
 # Installs all of Tuxedo including samples without LDAP support.  tlisten password is "oracle"
-# Tuxedo home is ~/tuxhome
-# TUXDIR is ~/tuxhome/tuxedo12.1.3.0.0
+# Tuxedo home is ~/tuxHome
+# TUXDIR is ~/tuxHome/tuxedo12.1.3.0.0
 ./Disk1/install/runInstaller -invPtrLoc /home/tuxtest/Downloads/oraInst.loc -responseFile ~/Downloads/tuxedo12.1.3.rsp -silent -waitforcompletion
 #
 # Remove the installer, but not the kit or response file
@@ -41,7 +41,7 @@ rm -Rf Disk1
 echo "Installation done, starting rolling patch"
 #
 # Install rolling patch
-export ORACLE_HOME=~/tuxhome
+export ORACLE_HOME=~/tuxHome
 unzip -qq $PATCH
 # Get the patch zip file name from the patch kit name, get everything before the first _
 zipname=`echo "$PATCH" | cut -d'_' -f1`

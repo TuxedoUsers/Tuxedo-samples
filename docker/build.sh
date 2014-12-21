@@ -21,8 +21,12 @@ fi
 
 echo "====================="
 
-docker build -t oracle/tuxedo tuxedo.Dockerfile
-
-echo ""
-echo "Tuxedo Docker Container is ready to be used. To start, run 'dockTuxedo.sh'"
+docker build -t oracle/tuxedo .
+if [ "$?" = "0" ]
+    then
+	echo ""
+	echo "Tuxedo Docker image is ready to be used. To start, run 'dockTuxedo.sh'"
+    else
+	echo "Build of Tuxedo Docker image failed."
+fi
 
