@@ -1,0 +1,9 @@
+KIT_LOCATION		/home/vagrant/Downloads
+INSTALLER_DIR		/home/vagrant/temp
+ORA_INVENTORY		/home/vagrant/oraInventory
+PRODUCT_HOME		/home/vagrant/tuxHome
+HOME_NAME		tuxHome
+USER_NAME		vagrant
+GROUP_NAME		vagrant
+TLISTEN_PORT		3050
+TLISTEN_PASSWORD	oracle

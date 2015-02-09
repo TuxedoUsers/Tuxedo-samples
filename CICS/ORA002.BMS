@@ -1,0 +1,127 @@
+**  Micro Focus BMS SCREENS Generated Code
+**  MapSet Name : DEMO02
+**  Date Created: 09/04/95
+**  Time Created: 19:21:29
+**  Micro Focus BMS SCREENS Generated Code
+**
+ORA002  DFHMSD DATA=FIELD,                                             -
+               EXTATT=NO,                                              -
+               HILIGHT=OFF,                                            -
+               LANG=COBOL,                                             -
+               MAPATTS=(HILIGHT),                                      -
+               MODE=INOUT,                                             -
+               OBFMT=NO,                                               -
+               STORAGE=AUTO,                                           -
+               TERM=3270,                                              -
+               TIOAPFX=YES,                                            -
+               TYPE=&&SYSPARM 
+**
+**
+**Map MAPA01
+**
+**
+MAPA01  DFHMDI DATA=FIELD,                                             -
+               OBFMT=NO,                                               -
+               SIZE=(24,80),                                           -
+               TIOAPFX=YES 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=20,                                              -
+               POS=(1,26),                                             -
+               INITIAL='CADASTRO DE CLIENTES' 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=9,                                               -
+               POS=(4,13),                                             -
+               INITIAL='CODIGO  :' 
+CODIGO  DFHMDF ATTRB=(FSET,NORM,NUM,UNPROT),                           -
+               JUSTIFY=(RIGHT,ZERO),                                   -
+               LENGTH=3,                                               -
+               PICIN='999',                                            -
+               PICOUT='999',                                           -
+               POS=(4,23) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(4,27) 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=9,                                               -
+               POS=(6,13),                                             -
+               INITIAL='NOME    :' 
+NOME    DFHMDF ATTRB=(FSET,NORM,UNPROT),                               -
+               LENGTH=30,                                              -
+               POS=(6,23) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(6,54) 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=9,                                               -
+               POS=(8,13),                                             -
+               INITIAL='ENDERECO:' 
+ENDEREC DFHMDF ATTRB=(FSET,NORM,UNPROT),                               -
+               LENGTH=30,                                              -
+               POS=(8,23) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(8,54) 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=9,                                               -
+               POS=(10,13),                                            -
+               INITIAL='CIDADE  :' 
+CIDADE  DFHMDF ATTRB=(FSET,NORM,UNPROT),                               -
+               LENGTH=20,                                              -
+               POS=(10,23) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(10,44) 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=9,                                               -
+               POS=(12,13),                                            -
+               INITIAL='ESTADO  :' 
+ESTADO  DFHMDF ATTRB=(FSET,NORM,UNPROT),                               -
+               LENGTH=2,                                               -
+               POS=(12,23) 
+NOMEEST DFHMDF ATTRB=(FSET,NORM,PROT),                                 -
+               LENGTH=25,                                              -
+               POS=(12,26) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(12,52) 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=9,                                               -
+               POS=(14,13),                                            -
+               INITIAL='C.E.P.  :' 
+CEP     DFHMDF ATTRB=(FSET,NORM,UNPROT),                               -
+               LENGTH=8,                                               -
+               PICIN='99999999',                                       -
+               PICOUT='99999999',                                      -
+               POS=(14,23) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(14,32) 
+ERRMSG  DFHMDF ATTRB=(FSET,NORM,PROT),                                 -
+               LENGTH=60,                                              -
+               POS=(20,3) 
+        DFHMDF ATTRB=(ASKIP),                                          -
+               LENGTH=1,                                               -
+               POS=(20,64) 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=7,                                               -
+               POS=(23,4),                                             -
+               INITIAL='F3=EXIT' 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=11,                                              -
+               POS=(23,16),                                            -
+               INITIAL='F4=CONSULTA' 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=11,                                              -
+               POS=(23,32),                                            -
+               INITIAL='F5=INCLUSAO' 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=12,                                              -
+               POS=(23,48),                                            -
+               INITIAL='F6=ALTERACAO' 
+        DFHMDF ATTRB=(ASKIP,NORM),                                     -
+               LENGTH=10,                                              -
+               POS=(23,65),                                            -
+               INITIAL='F7=DELECAO' 
+        DFHMSD TYPE=FINAL
+**
+        END
