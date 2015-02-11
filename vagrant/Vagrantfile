@@ -64,13 +64,10 @@ Vagrant.configure(2) do |config|
   config.vm.hostname = "tuxtest"
 
 config.ssh.pty = true
-
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   sudo apt-get update
-  #   sudo apt-get install -y apache2
-  # SHELL
-  config.vm.provision "shell", privileged: false, path: "install_tux.sh"
+config.vm.provision "file", source: "fix_locations.sh", destination: "~/temp/fix_locations.sh"
+config.vm.provision "file", source: "tuxedo.vagrant", destination: "~/temp/tuxedo.vagrant"
+config.vm.provision "file", source: "tuxedo12.1.3.rsp.template", destination: "~/temp/tuxedo12.1.3.rsp.template"
+config.vm.provision "file", source: "tuxedo12.1.3_silent_install.sh.template", destination: "~/temp/tuxedo12.1.3_silent_install.sh.template"
+config.vm.provision "file", source: "simpapp_runme.sh", destination: "~/simpapp_runme.sh"
+config.vm.provision "shell", privileged: false, path: "install_tux.sh"
 end
