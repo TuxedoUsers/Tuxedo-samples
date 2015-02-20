@@ -14,7 +14,7 @@
 #
 
 # Pull base image
-FROM oraclelinux:6.5
+FROM oraclelinux:7
 
 MAINTAINER Todd Little <toddjlittle@gmail.com>
 
