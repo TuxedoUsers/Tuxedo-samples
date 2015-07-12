@@ -46,7 +46,7 @@ Once the machines are up, you'll probably want to enable the scott/tiger accound
 
 	vagrant ssh collabn1
 	sudo su - oracle
-	. ./profile_racdba
+	. .profile_racdba
 	sqlplus / as sysdba
 	ALTER USER SCOTT ACCOUNT UNLOCK;
 	ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
