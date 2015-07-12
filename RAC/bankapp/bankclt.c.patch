@@ -1,0 +1,74 @@
+--- bankclt.c	2009-02-19 09:53:56.000000000 +0000
++++ ../bankapp_save/bankclt.c	2015-07-05 14:25:57.194684500 +0000
+@@ -42,7 +42,7 @@
+ static int	get_socsec(char *, int);
+ static int	get_phone(char *, int);
+ static int	get_val(char *, int, char *);
+-static int	getline(char *, int);
++static int	lgetline(char *, int);
+ static void	(_TMDLLENTRY unsolfcn)(char *, long, long);
+ static int	do_tpcall(char *);
+ 
+@@ -320,7 +320,7 @@
+ 	(void)fprintf(stdout, "Middle Initial: ");
+ 	(void)fflush(stdout);
+ 	midname[0] = '\0';
+-	if(getline(midname, sizeof(midname)) == 0)
++	if(lgetline(midname, sizeof(midname)) == 0)
+ 		return(0);
+ 	(void) Fchg(fbfr, MID_INIT, 0, midname, 0);
+ 
+@@ -524,7 +524,7 @@
+ 	/*CONSTCOND*/
+ 	while(1) {
+ 		(void)fprintf(stdout, message);
+-		if(getline(account, sizeof(account)) == 0)
++		if(lgetline(account, sizeof(account)) == 0)
+ 			return(-1);
+ 
+ 		for (i=0; account[i] != 0 && i <= 6; i++) {
+@@ -555,7 +555,7 @@
+ 	/*CONSTCOND*/
+ 	while(1) {
+ 		(void)fprintf(stdout, "\nEnter Amount: ");
+-		if(getline(amount, size) == 0)
++		if(lgetline(amount, size) == 0)
+ 			return(-1);
+ 
+ 		/* FORMAT:  1234567.00 */
+@@ -603,7 +603,7 @@
+ 
+ 	/*CONSTCOND*/
+ 	while(1) {
+-		if(getline(socsec, size) == 0)
++		if(lgetline(socsec, size) == 0)
+ 			return(-1);
+ 
+ 		if (!isdigit(socsec[0]) ||
+@@ -635,7 +635,7 @@
+ 
+ 	/*CONSTCOND*/
+ 	while(1) {
+-		if(getline(phone, size) == 0)
++		if(lgetline(phone, size) == 0)
+ 			return(-1);
+ 		if (!isdigit(phone[0]) ||
+ 		    !isdigit(phone[1]) ||
+@@ -668,7 +668,7 @@
+ 	/*CONSTCOND*/
+ 	while(1) {
+ 		*value = '\0';
+-		if(getline(value, size) == -1)
++		if(lgetline(value, size) == -1)
+ 			return(-1);
+ 		if (value[0] == '\0') {
+ 			(void)fprintf(stderr, "%s", warning);
+@@ -685,7 +685,7 @@
+  * Get a line of input from the keyboard.
+  */
+ static int
+-getline(char *value, int size)
++lgetline(char *value, int size)
+ {
+ 	int ch, offset = 0;
+ 

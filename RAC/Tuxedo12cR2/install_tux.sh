@@ -24,6 +24,5 @@ rm -Rf ~/temp
 cat << EOF >> ~/.bash_profile
 export TUXDIR=/home/vagrant/tuxHome/tuxedo12.1.3.0.0
 EOF
-
-
-
+# Fix the location of the Oracle client libraries in the Tuxedo RM file
+patch /home/vagrant/tuxHome/tuxedo12.1.3.0.0/udataobj/RM </media/sf_tuxedo/RM.patch

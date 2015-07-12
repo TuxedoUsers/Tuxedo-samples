@@ -1,0 +1,11 @@
+--- ../bankapp_save/crqueue.sh	2009-01-26 01:45:00.000000000 +0000
++++ crqueue.sh	2015-07-12 17:02:58.439772849 +0000
+@@ -19,7 +19,7 @@
+ if [ -x /usr/5bin/echo ] ; then
+         alias -x echo=/usr/5bin/echo
+ elif [ -x /bin/echo ] ; then
+-        alias -x echo=/bin/echo
++        alias echo=/bin/echo
+ fi
+ 
+ 

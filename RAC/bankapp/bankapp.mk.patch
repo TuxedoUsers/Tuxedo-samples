@@ -1,0 +1,134 @@
+--- bankapp.mk	2009-02-19 09:53:56.000000000 +0000
++++ ../bankapp_save/bankapp.mk	2015-07-12 15:40:46.359493121 +0000
+@@ -6,7 +6,7 @@
+ # ORACLE definitions
+ #
+ SUF=.pc
+-ORACLE_USER=demouser1/demouser1
++ORACLE_USER=scott/tiger
+ 
+ #
+ #	ANAME -- Name of this application (e.g. bankapp).
+@@ -38,7 +38,7 @@
+ # this value correctly, or the correct value must be passed via "make -f
+ # bankapp.mk TUXDIR=/correct/rootdir", or the build of bankapp will fail.
+ #
+-TUXDIR=../../..
++#TUXDIR=../../..
+ 
+ #
+ # Directory where the bankapp application source and executables live.
+@@ -46,7 +46,7 @@
+ # correct value must be passed via "make -f bankapp.mk
+ # APPDIR=/correct/appdir", or the build of bankapp will fail.
+ #
+-APPDIR=$(TUXDIR)/samples/atmi/bankapp
++#APPDIR=$(TUXDIR)/samples/atmi/bankapp
+ 
+ #
+ #
+@@ -74,8 +74,8 @@
+ # set DFML32 to -D_TMFML32
+ # set TMTYPESW to tmtypesw.o, copy $TUXDIR/lib/tmtypesw.c to this directory
+ # change the ubb files to use FML32 instead of FML and VIEW32 instead of VIEW
+-FML32=
+-DFML32=
++FML32=32
++DFML32=-D_TMFML32
+ TMTYPESW=
+ #
+ # C compiler flags:  enable TUXEDO System Distributed Transaction
+@@ -328,7 +328,7 @@
+ ACCT:	ACCT.o appinit.o util.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s OPEN_ACCT -s CLOSE_ACCT \
+ 		-o ACCT \
+ 		-f ACCT.o -f appinit.o -f util.o -f "$(TMTYPESW)"
+@@ -336,7 +336,7 @@
+ BAL:	BAL.o appinit.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s ABAL -s TBAL -s ABAL_BID -s TBAL_BID \
+ 		-o BAL \
+ 		-f BAL.o -f appinit.o  -f "$(TMTYPESW)"
+@@ -344,7 +344,7 @@
+ BALC:	BALC.o appinit.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s ABALC_BID -s TBALC_BID \
+ 		-o BALC \
+ 		-f BALC.o -f appinit.o  -f "$(TMTYPESW)"
+@@ -352,7 +352,7 @@
+ BTADD:	BTADD.o appinit.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s BR_ADD -s TLR_ADD \
+ 		-o BTADD \
+ 		-f BTADD.o -f appinit.o  -f "$(TMTYPESW)"
+@@ -360,7 +360,7 @@
+ TLR:	TLR.o util.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s DEPOSIT -s WITHDRAWAL  -s INQUIRY \
+ 		-o TLR \
+ 		-f TLR.o -f util.o -f -lm -f "$(TMTYPESW)"
+@@ -368,7 +368,7 @@
+ XFER:	XFER.o appinit.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s TRANSFER \
+ 		-o XFER \
+ 		-f XFER.o  -f appinit.o -f "$(TMTYPESW)"
+@@ -376,7 +376,7 @@
+ AUDITC:	AUDITC.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s AUDITC \
+ 		-o AUDITC \
+ 		-f AUDITC.o -f "$(TMTYPESW)"
+@@ -384,7 +384,7 @@
+ ACCTMGR:ACCTMGR.o $(TMTYPESW)
+ 	CFLAGS="$(CFLAGS)" \
+ 	TUXDIR=$(TUXDIR) \
+-	$(XCBINDIR)/buildserver -r $(RM) \
++	$(XCBINDIR)/buildserver -v -r $(RM) \
+ 		-s WATCHDOG -s Q_OPENACCT_LOG \
+ 		-o ACCTMGR \
+ 		-f ACCTMGR.o  -f "$(TMTYPESW)"
+@@ -465,8 +465,8 @@
+ # Rule for creating C programs from embedded SQL programs
+ #
+ .pc.c:
+-	$(ORACLE_HOME)/bin/proc include=$(ORACLE_HOME)/precomp/public \
+-	include=$(TUXDIR)/include \
++	proc \
++	include="(${TUXDIR}/include,/usr/include/oracle/12.1/client64)" \
+ 	-DANSI_PRO_C mode=ansi code=ansi_c \
+ 	ireclen=132 oreclen=132 select_error=no sqlcheck=limited \
+ 	userid=$(ORACLE_USER) iname=$<
+@@ -479,8 +479,8 @@
+ # Rule for creating object files from embedded SQL programs
+ #
+ .pc.o:
+-	$(ORACLE_HOME)/bin/proc include=$(ORACLE_HOME)/precomp/public \
+-	include=$(TUXDIR)/include \
++	proc include=/usr/include/oracle/12.1/client64 \
++	include="($(TUXDIR)/include,/usr/include/oracle/12.1/client64)" \
+ 	-DANSI_PRO_C mode=ansi code=ansi_c \
+ 	ireclen=132 oreclen=132 select_error=no sqlcheck=limited \
+ 	userid=$(ORACLE_USER) iname=$<

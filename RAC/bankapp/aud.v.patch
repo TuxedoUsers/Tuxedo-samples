@@ -1,0 +1,11 @@
+--- aud.v	2009-01-26 01:45:00.000000000 +0000
++++ ../bankapp_save/aud.v	2015-07-05 01:22:43.595360142 +0000
+@@ -4,7 +4,7 @@
+ #ident	"@(#) samples/atmi/bankapp/aud.v	$Revision: 1.5 $"
+ 
+ VIEW aud
+-$ /* View structure for audit information */
++#/* View structure for audit information */
+ #type  cname fbname count flag size null
+ long    b_id     BRANCH_ID  1  -    -    0
+ float   balance  BALANCE    1  -    -    0.0

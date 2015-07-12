@@ -1,0 +1,14 @@
+--- crbank.sh	2009-02-19 09:53:56.000000000 +0000
++++ ../bankapp_save/crbank.sh	2015-07-12 17:07:51.780783273 +0000
+@@ -1,4 +1,4 @@
+-#!/usr/bin/sh
++#!/bin/sh
+ 
+ # Create Oracle Tables for a bankapp Database
+ #    -  $1  is an ORACLE username/password combination, e.g. scott/tiger
+@@ -7,4 +7,4 @@
+ 
+ #ORACLE_SID=$2; export ORACLE_SID;
+ 
+-$ORACLE_HOME/bin/sqlplus $1 @crbank$2.ora
++/usr/lib/oracle/12.1/client64/bin/sqlplus $1 @crbank$2.ora

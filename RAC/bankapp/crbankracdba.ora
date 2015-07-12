@@ -1,0 +1,8 @@
+rem Create Oracle Tables for a bankapp Database
+
+drop table account ; 
+drop table teller;
+drop table branch ;
+drop table history ;
+@crbanktab.ora       
+quit

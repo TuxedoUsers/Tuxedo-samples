@@ -1,0 +1,11 @@
+--- bankflds	2009-01-26 01:45:00.000000000 +0000
++++ ../bankapp_save/bankflds	2015-07-05 16:35:44.126243709 +0000
+@@ -2,7 +2,7 @@
+ #Copyright (c) 1990 Unix System Laboratories, Inc.
+ #All rights reserved
+ #ident	"@(#) samples/atmi/bankapp/bankflds	$Revision: 1.5 $"
+-
++*base 5000
+ # Fields for database bankdb
+ # name                         number  type    flags   comments
+ ACCOUNT_ID                     110     long    -       -       
