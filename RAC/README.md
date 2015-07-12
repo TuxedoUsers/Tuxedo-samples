@@ -2,7 +2,7 @@
 This folder contains the necessary files to extend the racattack meets ansible-oracle project to include Tuxedo machines that include Tuxedo, Tuxedo patchset, and the Oracle Database instant client.
 
 ## Getting Started
-To get started, clone the racattack meets ansible-oracle github project found at https://github.com/oravirt/ansible-oracle
+To get started, clone the racattack meets ansible-oracle github project found at https://github.com/racattack/racattack-ansible-oracle
 
 For a description of that project please see: https://oravirt.wordpress.com/2014/12/23/racattack-meet-ansible-oracle/
 
