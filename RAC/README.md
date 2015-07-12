@@ -28,6 +28,8 @@ And download and copy into the Tuxedo12cR2 directory:
 | p19927652_121300_Linux-x86-64.zip	| Tuxedo rolling patch RP011					|
 | bankapp.zip				| Updated Tuxedo bankapp sample using Oracle database		|
 
+Note: The file p19927652_121300_Linux-x86-64.zip is the Tuxedo RP011 installer and needs to be downloaded from My Oracle Support, and not OTN.
+
 # Configuring things
 You will need edit the Vagrantfile file in the top level directory to determine the number of RAC nodes, the number of Tuxedo (application) nodes, and the resources such as memory to assign to each type of node.  Keep in mind that the minimum recommended memory for each RAC node is 3072 MB.  For the Tuxedo instances, 1000 MB is more than adequate.  You could probably get away with 512 MB for the Tuxedo instances.  So on an 8GB laptop you're probably limited to single instance RAC.  On a 16GB laptop you should be able to run with at least 2 RAC nodes and 3 or 4 Tuxedo nodes.
 
