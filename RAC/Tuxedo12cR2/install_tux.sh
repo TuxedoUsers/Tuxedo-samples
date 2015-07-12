@@ -26,3 +26,6 @@ export TUXDIR=/home/vagrant/tuxHome/tuxedo12.1.3.0.0
 EOF
 # Fix the location of the Oracle client libraries in the Tuxedo RM file
 patch /home/vagrant/tuxHome/tuxedo12.1.3.0.0/udataobj/RM </media/sf_tuxedo/RM.patch
+# Rename the Tuxedo /D sqlca.h out of the way
+mv /home/vagrant/tuxHome/tuxedo12.1.3.0.0/include/sqlca.h /home/vagrant/tuxHome/tuxedo12.1.3.0.0/include/sqlca.h.save
+

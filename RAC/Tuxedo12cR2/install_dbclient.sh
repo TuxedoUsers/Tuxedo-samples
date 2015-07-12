@@ -20,8 +20,7 @@ EOF
 chmod o+r tnsnames.ora
 sudo mv tnsnames.ora /usr/lib/oracle/12.1/client64
 cat << EOF >> ~/.bash_profile
-export ORACLE_HOME=/usr/lib/oracle/12.1/client64
-export LD_LIBRARY_PATH=${ORACLE_HOME}/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib:$LD_LIBRARY_PATH
 export LIBPATH=${ORACLE_HOME}/lib:$LIBPATH
 export PATH=${ORACLE_HOME}/bin:$PATH
 export TNS_ADMIN=${ORACLE_HOME}

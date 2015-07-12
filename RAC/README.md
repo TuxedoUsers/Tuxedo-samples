@@ -57,6 +57,16 @@ You should now be able to use "vagrant ssh collaba1" to access the first Tuxedo 
 
 If everthing has worked, you should get an SQL prompt and a message indicating you are connected to a RAC database.
 
+# Running the bankapp sample
+To run the bankapp sample, perform the following commands:
+
+	vagrant ssh collaba1
+	unzip /media/sf_tuxedo/bankapp.zip
+	cp /media/sf_tuxedo/bankapp/* bankapp
+	cd bankapp
+	sh runme_shm.sh
+
+
 
 
 
