@@ -44,6 +44,9 @@ and wait.  Depending upon your machine and the number of RAC instances selected,
 # Post creation steps
 Once the machines are up, you'll probably want to enable the scott/tiger accound and enable XA support in the database.  You can log into the RAC cluster by "vagrant ssh collabn1".  From there you'll need to switch to the oracle account by entering "sudo su - oracle".  After that execute the profile file by ". .profile_racdba" which will set up some environment variables and aliases.  Once those are done, start sqlplus as in "sqlplus / as sysdba" and enter the following SQL statements:
 
+	vagrant ssh collabn1
+	sudo su - oracle
+	. ./profile_racdba
 	sqlplus / as sysdba
 	ALTER USER SCOTT ACCOUNT UNLOCK;
 	ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
@@ -65,9 +68,4 @@ To run the bankapp sample, perform the following commands:
 	cp /media/sf_tuxedo/bankapp/* bankapp
 	cd bankapp
 	sh runme_shm.sh
-
-
-
-
-
 
