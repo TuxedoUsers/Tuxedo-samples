@@ -8,6 +8,7 @@ For a description of that project please see: https://oravirt.wordpress.com/2014
 
 ## Downloading from OTN
 Once that project has been cloned, copy the files contained in this subproject into the directory tree.  You can just unzip the RAC.zip file.  As well you will need to download and copy the following installers/kits into the 12cR1 directory:
+
 | File                                  | What it contains						|
 | ------------------------------------- | -------------------------------				|
 | linuxamd64_12102_database_1of2.zip	| Oracle Database 12.1.0.2 installer				|
