@@ -31,4 +31,7 @@ tmloadcf -y ubbshm
 #
 # Boot the application
 tmboot -y
+#
+# Populate the database(s) with accounts
+./populate
 

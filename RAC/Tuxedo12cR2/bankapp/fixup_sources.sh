@@ -10,5 +10,5 @@ patch crbank.sh <crbank.sh.patch
 chmod u+x crbank.sh
 patch crqueue.sh <crqueue.sh.patch
 chmod u+x crqueue.sh
-
+patch populate.sh <populate.sh.patch
 
