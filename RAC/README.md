@@ -48,10 +48,10 @@ Once the machines are up, you'll probably want to enable the scott/tiger accound
 	sudo su - oracle
 	. .profile_racdba
 	sqlplus / as sysdba
-	ALTER USER SCOTT ACCOUNT UNLOCK;
-	ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
-	ALTER USER SCOTT IDENTIFIED BY TIGER;
-	GRANT SELECT ON SYS.DBA_PENDING_TRANSACTIONS TO SCOTT;
+	alter user scott account unlock;
+	alter profile default limit password_life_time unlimited;
+	alter user scott identified by tiger;
+	grant select on sys.dba_pending_transactions to scott;
 
 # Setup verification
 You should now be able to use "vagrant ssh collaba1" to access the first Tuxedo machine and the verify that sqlplus works by trying:
