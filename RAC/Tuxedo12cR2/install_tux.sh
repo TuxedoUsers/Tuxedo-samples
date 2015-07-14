@@ -21,7 +21,7 @@ sh tuxedo12.1.3_silent_install.sh
 # Clean up the temp directory
 rm -Rf ~/temp
 # Add TUXDIR to profile
-cat << EOF >> ~/.bash_profile
+cat << EOF >> ~/.bashrc
 export TUXDIR=/home/vagrant/tuxHome/tuxedo12.1.3.0.0
 EOF
 # Fix the location of the Oracle client libraries in the Tuxedo RM file

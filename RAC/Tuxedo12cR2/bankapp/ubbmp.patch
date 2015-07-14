@@ -1,0 +1,32 @@
+--- /media/sf_tuxedo/bankapp_mp/ubbmp	2015-07-13 19:20:42.458270345 +0000
++++ ubbmp	2015-07-13 22:39:37.362185210 +0000
+@@ -88,8 +88,11 @@
+ *NETWORK
+ SITE1	NADDR="//collaba1.racattack:7700"
+ 	NLSADDR="//collaba1.racattack:7710"
++	MINENCRYPTBITS=0 MAXENCRYPTBITS=0
+ SITE2	NADDR="//collaba2.racattack:7700"
+ 	NLSADDR="//collaba2.racattack:7710"
++	MINENCRYPTBITS=0 MAXENCRYPTBITS=0
++
+ *SERVERS
+ #
+ # TUXEDO System /T server providing application specific authentication.
+@@ -178,14 +181,14 @@
+ TBALC_BID	PRIO=30		ROUTING=b_id
+ *ROUTING
+ ACCOUNT_ID	FIELD=ACCOUNT_ID
+-		BUFTYPE="FML"
++		BUFTYPE="FML32"
+ 		RANGES="10000-59999:BANKB1,
+ 			60000-109999:BANKB2"
+ BRANCH_ID	FIELD=BRANCH_ID
+-		BUFTYPE="FML"
++		BUFTYPE="FML32"
+ 		RANGES="1-5:BANKB1,
+ 			6-10:BANKB2"
+ b_id		FIELD=b_id
+-		BUFTYPE="VIEW:aud"
++		BUFTYPE="VIEW32:aud"
+ 		RANGES="1-5:BANKB1,
+ 			6-10:BANKB2"

@@ -19,7 +19,7 @@ RACDBA =
 EOF
 chmod o+r tnsnames.ora
 sudo mv tnsnames.ora /usr/lib/oracle/12.1/client64
-cat << EOF >> ~/.bash_profile
+cat << EOF >> ~/.bashrc
 export LD_LIBRARY_PATH=/usr/lib/oracle/12.1/client64/lib:$LD_LIBRARY_PATH
 export LIBPATH=/usr/lib/oracle/12.1/client64/lib:$LIBPATH
 export PATH=/usr/lib/oracle/12.1/client64/bin:$PATH
