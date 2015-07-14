@@ -37,7 +37,7 @@ You will need edit the Vagrantfile file in the top level directory to determine 
 Once you have everything in place and edited Vagrantfile, from the top level directory of the project (where Vagrantfile is located) issue these two commands:
 
 	vagrant up
-	vagrant setup=standard vagrant provision
+	setup=standard vagrant provision
 
 and wait.  Depending upon your machine and the number of RAC instances selected, this can take anywhere from 30 minutes to well over an hour.  Once it completes, you will have N RAC nodes named collabn# where # is from 1 to N, and M Tuxedo nodes named collaba# where # is from 1 to M.  Single instance RAC works, and Flex Clusters are also supposed to work, although I haven't tried them.
 
