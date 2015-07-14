@@ -6,8 +6,10 @@ To get started, clone the racattack meets ansible-oracle github project found at
 
 For a description of that project please see: https://oravirt.wordpress.com/2014/12/23/racattack-meet-ansible-oracle/
 
-## Downloading from OTN
-Once that project has been cloned, copy the files contained in this subproject into the directory tree.  You can just unzip the RAC.zip file.  As well you will need to download and copy the following installers/kits into the 12cR1 directory:
+Once that project has been cloned, copy the RAC.zip file from this project to the root of the racattack-meet-ansible-oracle project and unzip the file there.
+
+## Downloading from OTN and My Oracle Support
+Because of distribution restrictions on Oracle licensed software, you will need to download and copy the following installers/kits into the 12cR1 directory of the project:
 
 | File                                  | What it contains						|
 | ------------------------------------- | -------------------------------				|
@@ -44,28 +46,29 @@ and wait.  Depending upon your machine and the number of RAC instances selected,
 # Post creation steps
 Once the machines are up, you'll probably want to enable the scott/tiger accound and enable XA support in the database.  You can log into the RAC cluster by "vagrant ssh collabn1".  From there you'll need to switch to the oracle account by entering "sudo su - oracle".  After that execute the profile file by ". .profile_racdba" which will set up some environment variables and aliases.  Once those are done, start sqlplus as in "sqlplus / as sysdba" and enter the following SQL statements:
 
-	vagrant ssh collabn1
-	sudo su - oracle
-	. .profile_racdba
-	sqlplus / as sysdba
-	alter user scott account unlock;
-	alter profile default limit password_life_time unlimited;
-	alter user scott identified by tiger;
-	grant select on sys.dba_pending_transactions to scott;
+    vagrant ssh collabn1
+    sudo su - oracle
+    . .profile_racdba
+    sqlplus / as sysdba
+    alter user scott account unlock;
+    alter profile default limit password_life_time unlimited;
+    alter user scott identified by tiger;
+    grant select on sys.dba_pending_transactions to scott;
 
 # Setup verification
 You should now be able to use "vagrant ssh collaba1" to access the first Tuxedo machine and the verify that sqlplus works by trying:
 
-	sqlplus scott/tiger@racdba
+    sqlplus scott/tiger@racdba
 
 If everthing has worked, you should get an SQL prompt and a message indicating you are connected to a RAC database.
 
 # Running the bankapp sample
 To run the bankapp sample, perform the following commands:
 
-	vagrant ssh collaba1
-	unzip /media/sf_tuxedo/bankapp.zip
-	cp /media/sf_tuxedo/bankapp/* bankapp
-	cd bankapp
-	sh runme_shm.sh
+    vagrant ssh collaba1
+    unzip /media/sf_tuxedo/bankapp.zip
+    cp /media/sf_tuxedo/bankapp/* bankapp
+    cd bankapp
+    sh runme.sh [mp]
 
+To run bankapp on a single node in SHM mode, leave off the optional mp paramter.  If you want to run in a two node configuration, pass the mp parameter to the runme.sh script.  The runme.sh will build everything, set up the environment, create the database tables, start the application, and then populate the the bank with accounts.
