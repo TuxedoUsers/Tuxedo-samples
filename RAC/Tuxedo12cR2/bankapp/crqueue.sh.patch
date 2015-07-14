@@ -1,5 +1,5 @@
---- ../bankapp_save/crqueue.sh	2009-01-26 01:45:00.000000000 +0000
-+++ crqueue.sh	2015-07-12 17:02:58.439772849 +0000
+--- ../bankapp_orig/crqueue.sh	2009-01-26 01:45:00.000000000 +0000
++++ crqueue.sh	2015-07-14 12:28:53.212208968 +0000
 @@ -19,7 +19,7 @@
  if [ -x /usr/5bin/echo ] ; then
          alias -x echo=/usr/5bin/echo
@@ -9,3 +9,14 @@
  fi
  
  
+@@ -63,8 +63,8 @@
+ #
+ 
+ qmadmin <<!  >/dev/null
+-crdl ${QMCONFIG} 0 500
+-qspacecreate QSP_BANKAPP 88945 200 20 5 5 200 Q_ERROR 'y' 16
++crdl ${QMCONFIG} 0 7000
++qspacecreate QSP_BANKAPP 88945 5000 20 5 5 500 Q_ERROR 'y' 16
+ qopen QSP_BANKAPP
+ qcreate Q_ERROR fifo none 0 0 100% 0% ""
+ qcreate Q_OPENACCT_LOG fifo none 2 2 5m 0m "tmboot -s TMQFORWARD"

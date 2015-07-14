@@ -37,15 +37,19 @@ do_remote "$1"
 . ./setenv.sh
 #
 # Fix up the sources that are distributed by Oracle.
-do_both "sh fixup_sources.sh"
+sh fixup_sources.sh
 
 #
 # Create all the executables and scripts
-do_both "make -f bankapp.mk"
+make -f bankapp.mk
 
 #
 # Create the Oracle TMS
-do_both "buildtms -r Oracle_XA -o TMS_ORACLE"
+buildtms -r Oracle_XA -o TMS_ORACLE
+
+#
+# Copy files to other node
+scp -r ~/bankapp vagrant@collaba2:
 
 #
 # Create the database

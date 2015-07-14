@@ -1,6 +1,6 @@
---- ../bankapp/ubbshm	2009-02-19 09:53:56.000000000 +0000
-+++ ubbshm	2015-07-12 16:52:17.300766806 +0000
-@@ -19,11 +19,9 @@
+--- ../bankapp_orig/ubbshm	2009-02-19 09:53:56.000000000 +0000
++++ ubbshm	2015-07-14 12:05:21.108237663 +0000
+@@ -19,30 +19,31 @@
  
  *RESOURCES
  IPCKEY		80952
@@ -14,7 +14,13 @@
  MAXSERVICES	75
  MAXCONV		10
  MASTER		SITE1
-@@ -35,14 +33,15 @@
+ SCANUNIT	10
+ MODEL		SHM	
+ LDBAL		Y
++OPTIONS		EECS
++RMOPTIONS	NONE
+ ##SECURITY	ACL
+ ##AUTHSVC		"..AUTHSVC"
  #
  #
  *MACHINES
@@ -37,7 +43,7 @@
  
  #
  #
-@@ -55,27 +54,27 @@
+@@ -55,27 +56,27 @@
  #
  # Group for Application Queue (/Q) Servers
  #
@@ -73,7 +79,7 @@
  
  
  #
-@@ -93,39 +92,39 @@
+@@ -93,39 +94,39 @@
  # dequeues messages on behalf of programs calling tpenqueue(3) and
  # tpdequeue(3) respectively. Ref. TMQUEUE(5).
  #
@@ -126,7 +132,7 @@
   
  DEFAULT: RESTART=Y MAXGEN=5 REPLYQ=Y CLOPT="-A"
  TLR	SRVGRP=BANKB1	SRVID=1		CLOPT="-A -- -T 100 -e 1000.00"
-@@ -167,17 +166,17 @@
+@@ -167,17 +168,17 @@
  TBALC_BID	PRIO=30		ROUTING=b_id
  *ROUTING
  ACCOUNT_ID	FIELD=ACCOUNT_ID
