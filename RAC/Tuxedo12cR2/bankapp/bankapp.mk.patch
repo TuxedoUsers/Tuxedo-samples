@@ -1,5 +1,5 @@
---- bankapp.mk	2009-02-19 09:53:56.000000000 +0000
-+++ ../bankapp_save/bankapp.mk	2015-07-12 15:40:46.359493121 +0000
+--- /media/sf_tuxedo/bankapp_orig/bankapp.mk	2009-02-19 15:53:56.000000000 +0000
++++ bankapp.mk	2015-07-15 20:20:16.860237093 +0000
 @@ -6,7 +6,7 @@
  # ORACLE definitions
  #
@@ -38,7 +38,47 @@
  TMTYPESW=
  #
  # C compiler flags:  enable TUXEDO System Distributed Transaction
-@@ -328,7 +328,7 @@
+@@ -157,7 +157,8 @@
+ 	gendata \
+ 	ACCTMGR \
+ 	bankmgr \
+-	bankclt
++	bankclt \
++	loadgen
+ 
+ #
+ # Menus used by RUNME.sh and menudriver
+@@ -218,7 +219,8 @@
+ 	crbankdl1.ora \
+ 	crbankdl2.ora \
+ 	crbakdl3.ora \
+-	crbanktab.ora
++	crbanktab.ora \
++	loadgen.c
+ 
+ 
+ #
+@@ -240,7 +242,8 @@
+ 	util.c \
+ 	ACCTMGR.c \
+ 	bankmgr.c \
+-	bankclt.c
++	bankclt.c \
++	loadgen.c
+ 
+ #
+ # C functions that are generated from embedded SQL programs
+@@ -272,7 +275,8 @@
+ 	TLR.o \
+ 	ACCTMGR.o \
+ 	bankmgr.o \
+-	bankclt.o
++	bankclt.o \
++	loadgen.o
+ 
+ # Exhaustive list of targets to be made
+ #
+@@ -328,7 +332,7 @@
  ACCT:	ACCT.o appinit.o util.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -47,7 +87,7 @@
  		-s OPEN_ACCT -s CLOSE_ACCT \
  		-o ACCT \
  		-f ACCT.o -f appinit.o -f util.o -f "$(TMTYPESW)"
-@@ -336,7 +336,7 @@
+@@ -336,7 +340,7 @@
  BAL:	BAL.o appinit.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -56,7 +96,7 @@
  		-s ABAL -s TBAL -s ABAL_BID -s TBAL_BID \
  		-o BAL \
  		-f BAL.o -f appinit.o  -f "$(TMTYPESW)"
-@@ -344,7 +344,7 @@
+@@ -344,7 +348,7 @@
  BALC:	BALC.o appinit.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -65,7 +105,7 @@
  		-s ABALC_BID -s TBALC_BID \
  		-o BALC \
  		-f BALC.o -f appinit.o  -f "$(TMTYPESW)"
-@@ -352,7 +352,7 @@
+@@ -352,7 +356,7 @@
  BTADD:	BTADD.o appinit.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -74,7 +114,7 @@
  		-s BR_ADD -s TLR_ADD \
  		-o BTADD \
  		-f BTADD.o -f appinit.o  -f "$(TMTYPESW)"
-@@ -360,7 +360,7 @@
+@@ -360,7 +364,7 @@
  TLR:	TLR.o util.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -83,7 +123,7 @@
  		-s DEPOSIT -s WITHDRAWAL  -s INQUIRY \
  		-o TLR \
  		-f TLR.o -f util.o -f -lm -f "$(TMTYPESW)"
-@@ -368,7 +368,7 @@
+@@ -368,7 +372,7 @@
  XFER:	XFER.o appinit.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -92,7 +132,7 @@
  		-s TRANSFER \
  		-o XFER \
  		-f XFER.o  -f appinit.o -f "$(TMTYPESW)"
-@@ -376,7 +376,7 @@
+@@ -376,7 +380,7 @@
  AUDITC:	AUDITC.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -101,7 +141,7 @@
  		-s AUDITC \
  		-o AUDITC \
  		-f AUDITC.o -f "$(TMTYPESW)"
-@@ -384,7 +384,7 @@
+@@ -384,7 +388,7 @@
  ACCTMGR:ACCTMGR.o $(TMTYPESW)
  	CFLAGS="$(CFLAGS)" \
  	TUXDIR=$(TUXDIR) \
@@ -110,7 +150,20 @@
  		-s WATCHDOG -s Q_OPENACCT_LOG \
  		-o ACCTMGR \
  		-f ACCTMGR.o  -f "$(TMTYPESW)"
-@@ -465,8 +465,8 @@
+@@ -414,6 +418,12 @@
+ 	TUXDIR=$(TUXDIR) \
+ 	$(XCBINDIR)/buildclient -o auditcon -f auditcon.o
+ 
++# load generation tool
++#
++loadgen:	loadgen.o
++	TUXDIR=$(TUXDIR) \
++	$(XCBINDIR)/buildclient -o loadgen -f loadgen.o
++
+ # Stand-alone C programs to generate ud input
+ #
+ gentran gendata:
+@@ -465,8 +475,8 @@
  # Rule for creating C programs from embedded SQL programs
  #
  .pc.c:
@@ -121,7 +174,7 @@
  	-DANSI_PRO_C mode=ansi code=ansi_c \
  	ireclen=132 oreclen=132 select_error=no sqlcheck=limited \
  	userid=$(ORACLE_USER) iname=$<
-@@ -479,8 +479,8 @@
+@@ -479,8 +489,8 @@
  # Rule for creating object files from embedded SQL programs
  #
  .pc.o:
