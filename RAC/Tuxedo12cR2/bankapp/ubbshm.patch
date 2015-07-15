@@ -1,155 +1,155 @@
---- ubbshm	2015-07-15 18:19:03.819154069 +0000
-+++ /media/sf_tuxedo/bankapp_orig/ubbshm	2009-02-19 15:53:56.000000000 +0000
-@@ -19,31 +19,30 @@
+--- /media/sf_tuxedo/bankapp_orig/ubbshm	2009-02-19 15:53:56.000000000 +0000
++++ ubbshm	2015-07-15 20:05:37.068177098 +0000
+@@ -19,30 +19,31 @@
  
  *RESOURCES
  IPCKEY		80952
-+UID		<user id from id(1)>
-+GID		<group id from id(1)>
+-UID		<user id from id(1)>
+-GID		<group id from id(1)>
  PERM		0660
--MAXACCESSERS	80
--MAXSERVERS	50
-+MAXACCESSERS	40
-+MAXSERVERS	35
+-MAXACCESSERS	40
+-MAXSERVERS	35
++MAXACCESSERS	80
++MAXSERVERS	50
  MAXSERVICES	75
  MAXCONV		10
  MASTER		SITE1
  SCANUNIT	10
  MODEL		SHM	
  LDBAL		Y
--OPTIONS		EECS,ECID_CREATE,ECID_USERLOG,EXT_MON
--RMOPTIONS	NONE
++OPTIONS		EECS,ECID_CREATE,ECID_USERLOG,EXT_MON
++RMOPTIONS	NONE
  ##SECURITY	ACL
  ##AUTHSVC		"..AUTHSVC"
  #
  #
  *MACHINES
--"collaba1.racattack" LMID=SITE1
--		TUXDIR="/home/vagrant/tuxHome/tuxedo12.1.3.0.0"
--		APPDIR="/home/vagrant/bankapp"
--		ENVFILE="/home/vagrant/bankapp/ENVFILE"
--		TLOGDEVICE="/home/vagrant/bankapp/TLOG"
-+<SITE1's uname> LMID=SITE1
-+		TUXDIR="<TUXDIR1>"
-+		APPDIR="<APPDIR1>"
-+		ENVFILE="<APPDIR1>/ENVFILE"
-+		TLOGDEVICE="<APPDIR1>/TLOG"
+-<SITE1's uname> LMID=SITE1
+-		TUXDIR="<TUXDIR1>"
+-		APPDIR="<APPDIR1>"
+-		ENVFILE="<APPDIR1>/ENVFILE"
+-		TLOGDEVICE="<APPDIR1>/TLOG"
++"collaba1.racattack" LMID=SITE1
++		TUXDIR="/home/vagrant/tuxHome/tuxedo12.1.3.0.0"
++		APPDIR="/home/vagrant/bankapp"
++		ENVFILE="/home/vagrant/bankapp/ENVFILE"
++		TLOGDEVICE="/home/vagrant/bankapp/TLOG"
  		TLOGNAME=TLOG
--		TUXCONFIG="/home/vagrant/bankapp/tuxconfig"
--		ULOGPFX="/home/vagrant/bankapp/ULOG"
--
-+		TUXCONFIG="<APPDIR1>/tuxconfig"
-+		ULOGPFX="<APPDIR1>/ULOG"
+-		TUXCONFIG="<APPDIR1>/tuxconfig"
+-		ULOGPFX="<APPDIR1>/ULOG"
++		TUXCONFIG="/home/vagrant/bankapp/tuxconfig"
++		ULOGPFX="/home/vagrant/bankapp/ULOG"
++
  
  #
  #
-@@ -56,27 +55,27 @@
+@@ -55,27 +56,27 @@
  #
  # Group for Application Queue (/Q) Servers
  #
--QGRP1	LMID=SITE1	GRPNO=102
--	TMSNAME=TMS_QM	TMSCOUNT=2
--	OPENINFO="TUXEDO/QM:/home/vagrant/bankapp/qdevice:QSP_BANKAPP"
-+##QGRP1	LMID=SITE1	GRPNO=102
-+##	TMSNAME=TMS_QM	TMSCOUNT=2
-+##	OPENINFO="TUXEDO/QM:<APPDIR1>/qdevice:QSP_BANKAPP"
+-##QGRP1	LMID=SITE1	GRPNO=102
+-##	TMSNAME=TMS_QM	TMSCOUNT=2
+-##	OPENINFO="TUXEDO/QM:<APPDIR1>/qdevice:QSP_BANKAPP"
++QGRP1	LMID=SITE1	GRPNO=102
++	TMSNAME=TMS_QM	TMSCOUNT=2
++	OPENINFO="TUXEDO/QM:/home/vagrant/bankapp/qdevice:QSP_BANKAPP"
   
  #
  # Group for Application Manager's Servers
  #
--MGRGRP1	LMID=SITE1      GRPNO=103
-+##MGRGRP1	LMID=SITE1      GRPNO=103
+-##MGRGRP1	LMID=SITE1      GRPNO=103
++MGRGRP1	LMID=SITE1      GRPNO=103
   
  #
  # Group for Event Broker Servers
  #
--EVBGRP1	LMID=SITE1      GRPNO=104
-+##EVBGRP1	LMID=SITE1      GRPNO=104
+-##EVBGRP1	LMID=SITE1      GRPNO=104
++EVBGRP1	LMID=SITE1      GRPNO=104
  
  DEFAULT:	TMSNAME=TMS_ORACLE	TMSCOUNT=2 LMID=SITE1
  BANKB1		GRPNO=1
--		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
-+		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo1/tuxdemo1+SesTm=60+DbgFl=15+LogDir=."
+-		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo1/tuxdemo1+SesTm=60+DbgFl=15+LogDir=."
++		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
  BANKB2		GRPNO=2
--		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
-+		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo2/tuxdemo2+SesTm=60+DbgFl=15+LogDir=."
+-		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo2/tuxdemo2+SesTm=60+DbgFl=15+LogDir=."
++		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
  BANKB3		GRPNO=3
--		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
-+		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo3/tuxdemo3+SesTm=60+DbgFl=15+LogDir=."
+-		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo3/tuxdemo3+SesTm=60+DbgFl=15+LogDir=."
++		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
  
  
  #
-@@ -94,39 +93,39 @@
+@@ -93,39 +94,39 @@
  # dequeues messages on behalf of programs calling tpenqueue(3) and
  # tpdequeue(3) respectively. Ref. TMQUEUE(5).
  #
--TMQUEUE	SRVGRP=QGRP1	SRVID=1	CONV=N	GRACE=0
--	CLOPT="-s QSP_BANKAPP:TMQUEUE"
-+##TMQUEUE	SRVGRP=QGRP1	SRVID=1	CONV=N	GRACE=0
-+##	CLOPT="-s QSP_BANKAPP:TMQUEUE"
+-##TMQUEUE	SRVGRP=QGRP1	SRVID=1	CONV=N	GRACE=0
+-##	CLOPT="-s QSP_BANKAPP:TMQUEUE"
++TMQUEUE	SRVGRP=QGRP1	SRVID=1	CONV=N	GRACE=0
++	CLOPT="-s QSP_BANKAPP:TMQUEUE"
   
  #
  # TUXEDO System /T Message Forwarding Server that forwards messages that have
  # been stored using tpenqueue(3) for later processing. Ref. TMQFORWARD(5).
  #
--TMQFORWARD	SRVGRP=QGRP1	SRVID=2	CONV=N	REPLYQ=N GRACE=0
--	CLOPT="-- -e -n -d -q Q_OPENACCT_LOG"
-+##TMQFORWARD	SRVGRP=QGRP1	SRVID=2	CONV=N	REPLYQ=N GRACE=0
-+##	CLOPT="-- -e -n -d -q Q_OPENACCT_LOG"
+-##TMQFORWARD	SRVGRP=QGRP1	SRVID=2	CONV=N	REPLYQ=N GRACE=0
+-##	CLOPT="-- -e -n -d -q Q_OPENACCT_LOG"
++TMQFORWARD	SRVGRP=QGRP1	SRVID=2	CONV=N	REPLYQ=N GRACE=0
++	CLOPT="-- -e -n -d -q Q_OPENACCT_LOG"
  
  #
  # TUXEDO System /T User Event Broker that manages user events by notifying
  # subscribers when those events are posted. Ref. TMUSREVT(5).
  #
--TMUSREVT        SRVGRP=EVBGRP1	SRVID=1	GRACE=3600
--		ENVFILE="/home/vagrant/bankapp/TMUSREVT.ENV"
--		CLOPT="-e tmusrevt.out -o tmusrevt.out -A --
--			-f /home/vagrant/bankapp/tmusrevt.dat"
--		SEQUENCE=11
-+##TMUSREVT        SRVGRP=EVBGRP1	SRVID=1	GRACE=3600
-+##		ENVFILE="<APPDIR1>/TMUSREVT.ENV"
-+##		CLOPT="-e tmusrevt.out -o tmusrevt.out -A --
-+##			-f <APPDIR1>/tmusrevt.dat"
-+##		SEQUENCE=11
+-##TMUSREVT        SRVGRP=EVBGRP1	SRVID=1	GRACE=3600
+-##		ENVFILE="<APPDIR1>/TMUSREVT.ENV"
+-##		CLOPT="-e tmusrevt.out -o tmusrevt.out -A --
+-##			-f <APPDIR1>/tmusrevt.dat"
+-##		SEQUENCE=11
++TMUSREVT        SRVGRP=EVBGRP1	SRVID=1	GRACE=3600
++		ENVFILE="/home/vagrant/bankapp/TMUSREVT.ENV"
++		CLOPT="-e tmusrevt.out -o tmusrevt.out -A --
++			-f /home/vagrant/bankapp/tmusrevt.dat"
++		SEQUENCE=11
  
  #
  # TUXEDO Application Server that subscribes to certain events.
  #
--ACCTMGR SRVGRP=MGRGRP1	SRVID=1
--	CLOPT="-A -o ACCTMGR.LOG -- -w 1000.00"
--		SEQUENCE=12
-+##ACCTMGR SRVGRP=MGRGRP1	SRVID=1
-+##	CLOPT="-A -o ACCTMGR.LOG -- -w 1000.00"
-+##		SEQUENCE=12
+-##ACCTMGR SRVGRP=MGRGRP1	SRVID=1
+-##	CLOPT="-A -o ACCTMGR.LOG -- -w 1000.00"
+-##		SEQUENCE=12
++ACCTMGR SRVGRP=MGRGRP1	SRVID=1
++	CLOPT="-A -o ACCTMGR.LOG -- -w 1000.00"
++		SEQUENCE=12
  
  #
  # TUXEDO System /T Metadata Repository Server that manages application
  # services information for retrieving and updating. Ref. TMMETADATA(5).
  #
  ##TMMETADATA	SRVGRP=MGRGRP1	SRVID=1	CONV=N	RESTART=Y
--##	CLOPT="-A -- -f /home/vagrant/bankapp/metarepos.bk"
-+##	CLOPT="-A -- -f <APPDIR1>/metarepos.bk"
+-##	CLOPT="-A -- -f <APPDIR1>/metarepos.bk"
++##	CLOPT="-A -- -f /home/vagrant/bankapp/metarepos.bk"
   
  DEFAULT: RESTART=Y MAXGEN=5 REPLYQ=Y CLOPT="-A"
  TLR	SRVGRP=BANKB1	SRVID=1		CLOPT="-A -- -T 100 -e 1000.00"
-@@ -168,17 +167,17 @@
+@@ -167,17 +168,17 @@
  TBALC_BID	PRIO=30		ROUTING=b_id
  *ROUTING
  ACCOUNT_ID	FIELD=ACCOUNT_ID
--		BUFTYPE="FML32"
-+		BUFTYPE="FML"
+-		BUFTYPE="FML"
++		BUFTYPE="FML32"
  		RANGES="10000-49999:BANKB1,
  			50000-79999:BANKB2,
  			80000-109999:BANKB3"
  BRANCH_ID	FIELD=BRANCH_ID
--		BUFTYPE="FML32"
-+		BUFTYPE="FML"
+-		BUFTYPE="FML"
++		BUFTYPE="FML32"
  		RANGES="1-4:BANKB1,
  			5-7:BANKB2,
  			8-10:BANKB3"
  b_id		FIELD=b_id
--		BUFTYPE="VIEW32:aud"
-+		BUFTYPE="VIEW:aud"
+-		BUFTYPE="VIEW:aud"
++		BUFTYPE="VIEW32:aud"
  		RANGES="1-4:BANKB1,
  			5-7:BANKB2,
  			8-10:BANKB3"
