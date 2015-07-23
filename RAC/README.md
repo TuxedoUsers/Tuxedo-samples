@@ -30,7 +30,7 @@ And download and copy into the Tuxedo12cR2 directory:
 | p19927652_121300_Linux-x86-64.zip	| Tuxedo rolling patch RP011					|
 | bankapp.zip				| Updated Tuxedo bankapp sample using Oracle database		|
 
-Note: The file p19927652_121300_Linux-x86-64.zip is the Tuxedo RP011 installer and needs to be downloaded from My Oracle Support, and not OTN.
+Note: The file p19927652_121300_Linux-x86-64.zip is the Tuxedo 12.1.3 RP011 installer and needs to be downloaded from My Oracle Support, and not OTN.  Also you can download any Tuxedo 12.1.3 rolling patch installer, it doesn't have to be RP011.
 
 # Configuring things
 You will need edit the Vagrantfile file in the top level directory to determine the number of RAC nodes, the number of Tuxedo (application) nodes, and the resources such as memory to assign to each type of node.  Keep in mind that the minimum recommended memory for each RAC node is 3072 MB.  For the Tuxedo instances, 1000 MB is more than adequate.  You could probably get away with 512 MB for the Tuxedo instances.  So on an 8GB laptop you're probably limited to single instance RAC.  On a 16GB laptop you should be able to run with at least 2 RAC nodes and 3 or 4 Tuxedo nodes.
@@ -38,8 +38,8 @@ You will need edit the Vagrantfile file in the top level directory to determine 
 # Creating the VMs
 Once you have everything in place and edited Vagrantfile, from the top level directory of the project (where Vagrantfile is located) issue these two commands:
 
-	vagrant up
-	setup=standard vagrant provision
+    vagrant up
+    setup=standard vagrant provision
 
 and wait.  Depending upon your machine and the number of RAC instances selected, this can take anywhere from 30 minutes to well over an hour.  Once it completes, you will have N RAC nodes named collabn# where # is from 1 to N, and M Tuxedo nodes named collaba# where # is from 1 to M.  Single instance RAC works, and Flex Clusters are also supposed to work, although I haven't tried them.
 
@@ -72,3 +72,34 @@ To run the bankapp sample, perform the following commands:
     sh runme.sh [mp]
 
 To run bankapp on a single node in SHM mode, leave off the optional mp paramter.  If you want to run in a two node configuration, pass the mp parameter to the runme.sh script.  The runme.sh will build everything, set up the environment, create the database tables, start the application, and then populate the the bank with accounts.
+
+# Using other versions of Tuxedo and Oracle database instant client
+The default version of Tuxedo used is 12.1.3 and the default version of the Oracle database instant client is 12.1.  If you want to use Tuxedo 12.1.1 and/or Oracle database instant client 11.2, then you need to download these installers instead of the ones listed above:
+
+| File                                  | What it contains						|
+| ------------------------------------- | -------------------------------				|
+| oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm	| Oracle Database Instant Client 11.2	|
+| oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm	|					|
+| oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm	|					|
+| oracle-instantclient11.2-precomp-11.2.0.4.0-1.x86_64.rpm	|					|
+
+And download and copy into the Tuxedo12cR2 directory:
+
+| File                                  | What it contains						|
+| ------------------------------------- | -------------------------------				|
+| tuxedo12110_64_linux_5_x86.bin	| Tuxedo 12.1.1 installer					|
+| p20103223_121100_Linux-x86-64.zip	| Tuxedo rolling patch for Tuxedo 12.1.1			|
+
+Note: The file p20103223_121100_Linux-x86-64.zip is the Tuxedo 12.1.1 RP056 installer and needs to be downloaded from My Oracle Support, and not OTN.  Also you can download any Tuxedo 12.1.3 rolling patch installer, it doesn't have to be RP056.
+
+To use Tuxedo 12.1.1 instead of Tuxedo 12.1.3, add tuxver=12.1.1 to the vagrant provisioning command like:
+    
+    setup=standard tuxver=12.1.1 vagrant provision
+
+To use Oracle Database instant client 11.2, add icver=11.2 to the vagrant provisioning command like:
+
+    setup=standard icver=11.2 vagrant provision
+
+# Comments and Bug reports
+If you try this, please let me know.  Also if you run into any problems, please let me know.  I can be reached at my gmail account toddjlittle.
+
