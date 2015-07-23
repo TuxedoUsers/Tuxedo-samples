@@ -22,7 +22,7 @@ Because of distribution restrictions on Oracle licensed software, you will need 
 | oracle-instantclient12.1-devel-12.1.0.2.0-1.x86_64.rpm	|					|
 | oracle-instantclient12.1-precomp-12.1.0.2.0-1.x86_64.rpm	|					|
 
-And download and copy into the Tuxedo12cR2 directory:
+And download and copy into the Tuxedo directory:
 
 | File                                  | What it contains						|
 | ------------------------------------- | -------------------------------				|
@@ -83,7 +83,7 @@ The default version of Tuxedo used is 12.1.3 and the default version of the Orac
 | oracle-instantclient11.2-devel-11.2.0.4.0-1.x86_64.rpm	|					|
 | oracle-instantclient11.2-precomp-11.2.0.4.0-1.x86_64.rpm	|					|
 
-And download and copy into the Tuxedo12cR2 directory:
+And download and copy into the Tuxedo directory:
 
 | File                                  | What it contains						|
 | ------------------------------------- | -------------------------------				|

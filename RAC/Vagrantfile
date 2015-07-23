@@ -167,9 +167,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.synced_folder "12cR1", "/media/sf_12cR1", :mount_options => ["dmode=777","fmode=777","uid=54320","gid=54321"]
   end
 
-  if File.directory?("Tuxedo12cR2")
-    # our shared folder for Tuxedo 12cR2 installation files
-    config.vm.synced_folder "Tuxedo12cR2", "/media/sf_tuxedo", :mount_options => ["dmode=777","fmode=777","uid=54320","gid=54321"]
+  if File.directory?("Tuxedo")
+    # our shared folder for Tuxedo installation files
+    config.vm.synced_folder "Tuxedo", "/media/sf_tuxedo", :mount_options => ["dmode=777","fmode=777","uid=54320","gid=54321"]
   end
 
   ## IMPORTANT
