@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# Template file for tuxedo12.1.1_silent_install.sh
+#   The following variables are used in this template:
+#	KIT_LOCATION
+#	ORA_INVENTORY
+#	GROUP_NAME
+#
+# This procedure assumes that the following files are in the current directory:
+#	tuxedo12.1.1_silent_install.sh		- This file (generated from its template)
+#	install.properties			- Silent install response file (generated from its template)
+#
+#   and that these files can be found in the in <KIT_LOCATION>
+#	tuxedo12110_64_linux_5_x86.bin		- Tuxedo installation kit from Oracle
+#	p*_121100_Linux-x86-64.zip   		- Tuxedo lastest patch kit from Oracle
+#						  actual file name may be different
+#
+# Usage:  sh tuxedo12.1.1_silent_install.sh [patch-filename [tuxedo-installer-filename]]
+#
+# Created by Todd Little  1-Dec-2014
+#
+# Get the arguments
+set -x
+CURDIR=`pwd`
+INSTALLER=<KIT_LOCATION>/tuxedo12110_64_linux_5_x86.bin
+PATCH=`ls <KIT_LOCATION>/p*_121100_Linux-x86-64.zip | tail -1`
+if [ ! -z "$1" ]
+    then
+	PATCH=$1
+	if [ ! -z "$2" ]
+	    then
+		INSTALLER=$2
+	fi
+fi
+echo "Using patch file $PATCH"
+echo "Using Tuxedo installer $INSTALLER"
+# Run the installer in silent mode
+# 
+# Need to create oraInst.loc first:
+echo "inventory_loc=<ORA_INVENTORY>" > <INSTALLER_DIR>/oraInst.loc
+echo "inst_group=<GROUP_NAME>" >> <INSTALLER_DIR>/oraInst.loc
+#
+# Installs all of Tuxedo including samples without LDAP support.
+# Tuxedo home is <PRODUCT_HOME>
+# TUXDIR is <PRODUCT_HOME>/tuxedo12.1.1.0.0
+#
+sh $INSTALLER -f /home/vagrant/temp/installer.properties
+#
+# Remove the installer and generated response file
+#rm -Rf Disk1 tuxedo12.1.1.rsp
+echo "Installation done, starting rolling patch"
+#
+# Install rolling patch
+export ORACLE_HOME=<PRODUCT_HOME>
+unzip -qq $PATCH
+# Get the tar file name from the patch kit
+zipname=`find . -name *.tar.Z | tail -1`
+# untar the patch files
+tar -xzvf ${zipname}
+# invoke the installer and answer the user and group questions with vagrant
+./install <<!
+vagrant
+vagrant
+!
+# Clean up patch files
+
+
+

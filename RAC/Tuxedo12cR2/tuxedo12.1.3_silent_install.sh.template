@@ -12,8 +12,7 @@
 #
 #   and that these files can be found in the in <KIT_LOCATION>
 #	tuxedo121300_64_Linux_01_x86.zip	- Tuxedo installation kit from Oracle
-#	p19927652_121300_Linux-x86-64.zip	- Tuxedo lastest patch kit from Oracle - RP011
-#						  actual file name may be different
+#	p*_121300_Linux-x86-64.zip		- Tuxedo lastest patch kit from Oracle
 #
 # Usage:  sh tuxedo12.1.3_silent_install.sh [patch-filename [tuxedo-installer-filename]]
 #
@@ -21,8 +20,8 @@
 #
 # Get the arguments
 CURDIR=`pwd`
-INSTALLER=tuxedo121300_64_Linux_01_x86.zip
-PATCH=p19927652_121300_Linux-x86-64.zip
+INSTALLER=<KIT_LOCATION>/tuxedo121300_64_Linux_01_x86.zip
+PATCH=`ls <KIT_LOCATION>/p*_121300_Linux-x86-64.zip | tail -1`
 if [ ! -z "$1" ]
     then
 	PATCH=$1
@@ -35,7 +34,7 @@ echo "Using patch file $PATCH"
 echo "Using Tuxedo installer $INSTALLER"
 # Unzip the downloaded installation kit to the current directory
 cd <INSTALLER_DIR>
-unzip -qq <KIT_LOCATION>/$INSTALLER
+unzip -qq $INSTALLER
 # Run the installer in silent mode
 # 
 # Need to create oraInst.loc first:
@@ -54,12 +53,10 @@ echo "Installation done, starting rolling patch"
 #
 # Install rolling patch
 export ORACLE_HOME=<PRODUCT_HOME>
-unzip -qq <KIT_LOCATION>/$PATCH
-# Get the patch zip file name from the patch kit name, get everything before the first _
-zipname=`echo "$PATCH" | cut -d'_' -f1`
-# Strip of the p at the beginning
-zipname=${zipname:1:20}
-$ORACLE_HOME/OPatch/opatch apply -invPtrLoc <INSTALLER_DIR>/oraInst.loc $zipname.zip
+unzip -qq $PATCH
+# Get the patch zip file name from the patch kit
+zipname=`find . -name *.zip | tail -1`
+$ORACLE_HOME/OPatch/opatch apply -invPtrLoc <INSTALLER_DIR>/oraInst.loc $zipname
 # Clean up patch files
 #rm -f $zipname.zip patchlev README.txt releasenotes.txt
 

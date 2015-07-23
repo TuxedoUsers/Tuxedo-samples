@@ -1,6 +1,6 @@
---- /media/sf_tuxedo/bankapp_orig/ubbshm	2009-02-19 15:53:56.000000000 +0000
-+++ ubbshm	2015-07-15 20:05:37.068177098 +0000
-@@ -19,30 +19,31 @@
+--- bankapp_orig/ubbshm	2009-02-19 09:53:56.000000000 -0600
++++ bankapp_shm/ubbshm	2015-07-22 20:34:58.532510075 -0500
+@@ -19,30 +19,30 @@
  
  *RESOURCES
  IPCKEY		80952
@@ -17,8 +17,7 @@
  SCANUNIT	10
  MODEL		SHM	
  LDBAL		Y
-+OPTIONS		EECS,ECID_CREATE,ECID_USERLOG,EXT_MON
-+RMOPTIONS	NONE
++OPTIONS		ECID_CREATE,ECID_USERLOG,EXT_MON
  ##SECURITY	ACL
  ##AUTHSVC		"..AUTHSVC"
  #
@@ -30,7 +29,7 @@
 -		ENVFILE="<APPDIR1>/ENVFILE"
 -		TLOGDEVICE="<APPDIR1>/TLOG"
 +"collaba1.racattack" LMID=SITE1
-+		TUXDIR="/home/vagrant/tuxHome/tuxedo12.1.3.0.0"
++		TUXDIR="<TUXDIR>"
 +		APPDIR="/home/vagrant/bankapp"
 +		ENVFILE="/home/vagrant/bankapp/ENVFILE"
 +		TLOGDEVICE="/home/vagrant/bankapp/TLOG"
@@ -43,7 +42,7 @@
  
  #
  #
-@@ -55,27 +56,27 @@
+@@ -55,27 +55,27 @@
  #
  # Group for Application Queue (/Q) Servers
  #
@@ -79,7 +78,7 @@
  
  
  #
-@@ -93,39 +94,39 @@
+@@ -93,39 +93,39 @@
  # dequeues messages on behalf of programs calling tpenqueue(3) and
  # tpdequeue(3) respectively. Ref. TMQUEUE(5).
  #
@@ -132,7 +131,7 @@
   
  DEFAULT: RESTART=Y MAXGEN=5 REPLYQ=Y CLOPT="-A"
  TLR	SRVGRP=BANKB1	SRVID=1		CLOPT="-A -- -T 100 -e 1000.00"
-@@ -167,17 +168,17 @@
+@@ -167,17 +167,17 @@
  TBALC_BID	PRIO=30		ROUTING=b_id
  *ROUTING
  ACCOUNT_ID	FIELD=ACCOUNT_ID

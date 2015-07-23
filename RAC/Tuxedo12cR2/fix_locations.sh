@@ -15,12 +15,13 @@
 # GROUP_NAME		Group name of the account installing the kit	tuxtest
 # TLISTEN_PORT		Port for tlisten				3050
 # TLISTEN_PASSWORD	Password for tlisten				oracle
+# TUXDIR		Tuxedo installation directory			/home/vagrant/tuxHome/tuxedo12.1.3.0.0
 #	
 # To run this script, create a file with the above variables and their values with the variable name in the first
 # column and the value in the second column.  Invoke this script passing in the name of that file and the name
 # of the file to perform the substitutions in.
 #
-# Example:   fix_locations tuxedo.vagrant tuxedo12.1.3.rsp
+# Example:   fix_locations tuxedo.vagrant tuxedo12.1.3.rsp.template >tuxedo12.1.3.rsp
 #
 #
 TFILE="fix${RANDOM}.$$.tmp"

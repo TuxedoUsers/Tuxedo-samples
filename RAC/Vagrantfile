@@ -16,7 +16,7 @@ VAGRANTFILE_API_VERSION = "2"
 #### BEGIN CUSTOMIZATION ####
 #############################
 #define number of nodes
-num_APPLICATION       = 2
+num_APPLICATION       = 1
 num_LEAF_INSTANCES    = 0
 num_DB_INSTANCES      = 1
 #
@@ -43,10 +43,19 @@ count_shared_disk     = 4
 #############################
 ##### END CUSTOMIZATION #####
 #############################
+#
+# Environment options to specify versions:
+#
+#	Grid Infrastructure version:	12.1.0.2, 12.1.0.1, 11.2.0.4
+#	Database version:		12.1.0.2, 12.1.0.1, 11.2.0.4
+#	Instant Client version:		12.1, 11.2
+#	Tuxedo version: 		12.1.3, 12.1.1, 11.1.1.3.0, 11.1.1.2.0
 
 #if not defined, set defaults
 ENV['giver']||="12.1.0.2"
 ENV['dbver']||=ENV['giver']
+ENV['icver']||="12.1"
+ENV['tuxver']||="12.1.3"
 
 #this will give us version in format of 12102
 giver_i = ENV['giver'].gsub('.','').to_i
@@ -183,8 +192,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       config.vm.network :private_network, ip: lanip
       if ENV['setup']
-          config.vm.provision "shell", privileged: false, path: "Tuxedo12cR2/install_tux.sh"
-          config.vm.provision "shell", privileged: false, path: "Tuxedo12cR2/install_dbclient.sh"
+          config.vm.provision "shell", privileged: false, :inline => "bash /media/sf_tuxedo/install_tux.sh #{ENV['tuxver']}"
+          config.vm.provision "shell", privileged: false, :inline => "bash /media/sf_tuxedo/install_dbclient.sh #{ENV['icver']}"
       end
     end
   end

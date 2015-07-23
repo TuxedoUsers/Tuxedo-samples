@@ -2,30 +2,65 @@
 #
 # Typically runs as user vagrant
 #
-# unzip is not necessarily included in the base image, and run the database preinstall just
-# to make sure compilers, libraries, and some IPC settings are likely good.
-#sudo yum -y install unzip
-#sudo yum -y install oracle-rdbms-server-11gR2-preinstall
+# The version number to install may get passed in as a parameter
+set -x
+echo "Parameter = $1"
+tuxver=12.1.3
+if [ -n "$1" ]
+  then
+    tuxver=$1
+fi
+echo "Version = $tuxver"
+#
+# Set TUXDIR based upon the version being installed
+if [ "$tuxver" = "12.1.3" ]
+  then
+    TUXDIR=/home/vagrant/tuxHome/tuxedo12.1.3.0.0
+elif [ "$tuxver" = "12.1.1" ]
+  then
+    TUXDIR=/home/vagrant/tuxHome/tuxedo12.1.1.0.0
+elif [ "$tuxver" = "11.1.1.3.0" ]
+  then
+    TUXDIR=/home/vagrant/tuxHome/tuxedo11.1.1.3.0
+elif [ "$tuxver" = "11.1.1.2.0" ]
+  then
+    TUXDIR=/home/vagrant/tuxHome/tuxedo11.1.1.2.0
+else
+    echo "Unknown version to install"
+fi
+export TUXDIR=$TUXDIR
 #
 # Make a temporary directory to run the installers in
 mkdir temp
-# Unzip the installer helper files
-#unzip -o ~/Downloads/tuxedo_vagrant.zip
-# Now process the installation templates
+#
+# Now process the installation shell script template
 cd /media/sf_tuxedo
-sh fix_locations.sh tuxedo.vagrant tuxedo12.1.3_silent_install.sh.template >~/temp/tuxedo12.1.3_silent_install.sh
-sh fix_locations.sh tuxedo.vagrant tuxedo12.1.3.rsp.template >~/temp/tuxedo12.1.3.rsp
+# First add TUXDIR to the template values file
+cp tuxedo.vagrant ~/tuxedo.vagrant
+echo "TUXDIR	$TUXDIR" >> ~/tuxedo.vagrant
+sh fix_locations.sh tuxedo.vagrant tuxedo${tuxver}_silent_install.sh.template >~/temp/tuxedo${tuxver}_silent_install.sh
+#
+# For Tuxedo 12.1.3 and later, process the .rsp template.  For Tuxedo 12.1.1 process the .properties template
+if [ "$tuxver" = "12.1.3" ]
+  then
+    sh fix_locations.sh tuxedo.vagrant tuxedo${tuxver}.rsp.template >~/temp/tuxedo${tuxver}.rsp
+elif [ "$tuxver" = "12.1.1" ]
+  then
+    sh fix_locations.sh tuxedo.vagrant tuxedo${tuxver}.installer.properties.template >~/temp/installer.properties
+else
+    echo "Unsupported Tuxedo version"
+fi
 # Run the installer in silent mode
 cd ~/temp
-sh tuxedo12.1.3_silent_install.sh
+sh tuxedo${tuxver}_silent_install.sh
 # Clean up the temp directory
-rm -Rf ~/temp
+#rm -Rf ~/temp
 # Add TUXDIR to profile
 cat << EOF >> ~/.bashrc
-export TUXDIR=/home/vagrant/tuxHome/tuxedo12.1.3.0.0
+export TUXDIR=${TUXDIR}
 EOF
 # Fix the location of the Oracle client libraries in the Tuxedo RM file
-patch /home/vagrant/tuxHome/tuxedo12.1.3.0.0/udataobj/RM </media/sf_tuxedo/RM.patch
+#patch /home/vagrant/tuxHome/tuxedo${tuxver}/udataobj/RM </media/sf_tuxedo/RM.patch
 # Rename the Tuxedo /D sqlca.h out of the way
-mv /home/vagrant/tuxHome/tuxedo12.1.3.0.0/include/sqlca.h /home/vagrant/tuxHome/tuxedo12.1.3.0.0/include/sqlca.h.save
+mv ${TUXDIR}/include/sqlca.h ${TUXDIR}/include/sqlca.h.save
 

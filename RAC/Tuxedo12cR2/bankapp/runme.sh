@@ -39,6 +39,10 @@ do_remote "$1"
 # Fix up the sources that are distributed by Oracle.
 sh fixup_sources.sh
 
+# Now fix up the locations in UBBCONFIG file
+sh /media/sf_tuxedo/fix_locations.sh ~/tuxedo.vagrant ubb${MODEL} >ubb${MODEL}.tmp
+mv ubb${MODEL}.tmp ubb${MODEL}
+
 #
 # Create all the executables and scripts
 make -f bankapp.mk
@@ -48,8 +52,11 @@ make -f bankapp.mk
 buildtms -r Oracle_XA -o TMS_ORACLE
 
 #
-# Copy files to other node
-scp -r ~/bankapp vagrant@collaba2:
+# Copy files to other node if needed
+if [ "$MODEL" = 'mp' ]
+  then
+    scp -r ~/bankapp vagrant@collaba2:
+fi
 
 #
 # Create the database
@@ -60,7 +67,11 @@ tmloadcf -y ubb${MODEL}
 #
 # Create the transaction log
 ./crtlog -m
-do_remote "./crtlog"
+if [ "$MODEL" = 'mp' ]
+  then
+    do_remote "./crtlog"
+fi
+
 
 #
 # Create the queue space for /Q

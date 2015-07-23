@@ -1,6 +1,6 @@
---- /media/sf_tuxedo/bankapp_orig/ubbmp	2009-02-19 15:53:56.000000000 +0000
-+++ ubbmp	2015-07-15 20:05:40.204180772 +0000
-@@ -19,45 +19,44 @@
+--- bankapp_orig/ubbmp	2009-02-19 09:53:56.000000000 -0600
++++ bankapp_mp/ubbmp	2015-07-22 20:05:59.740461031 -0500
+@@ -19,45 +19,41 @@
  
  *RESOURCES
  IPCKEY		80952
@@ -21,12 +21,12 @@
 -BBLQUERY	30
 +SCANUNIT	2
 +SANITYSCAN	5
-+BBLQUERY	10
++BBLQUERY	5
  BLOCKTIME	30
- DBBLWAIT	6
+-DBBLWAIT	6
 -OPTIONS		LAN,MIGRATE
-+OPTIONS		LAN,MIGRATE,EECS,ECID_CREATE,ECID_USERLOG,EXT_MON
-+RMOPTIONS	NONE
++DBBLWAIT	3
++OPTIONS		LAN,MIGRATE,ECID_CREATE,ECID_USERLOG,EXT_MON
  MODEL		MP
  LDBAL		Y
  ##SECURITY	ACL
@@ -39,7 +39,7 @@
 -		ENVFILE="<APPDIR1>/ENVFILE"
 -		TLOGDEVICE="<APPDIR1>/TLOG"
 +"collaba1.racattack" LMID=SITE1
-+		TUXDIR="/home/vagrant/tuxHome/tuxedo12.1.3.0.0"
++		TUXDIR="<TUXDIR>"
 +		APPDIR="/home/vagrant/bankapp"
 +		ENVFILE="/home/vagrant/bankapp/ENVFILE"
 +		TLOGDEVICE="/home/vagrant/bankapp/TLOG"
@@ -54,9 +54,8 @@
 -		TLOGDEVICE="<APPDIR2>/TLOG"
 +		TUXCONFIG="/home/vagrant/bankapp/tuxconfig"
 +		ULOGPFX="/home/vagrant/bankapp/ULOG"
-+
-+"collaba2.racattack" LMID=SITE2
-+		TUXDIR="/home/vagrant/tuxHome/tuxedo12.1.3.0.0"
++"collaba2.racattack"	LMID=SITE2
++		TUXDIR="<TUXDIR>"
 +		APPDIR="/home/vagrant/bankapp"
 +		ENVFILE="/home/vagrant/bankapp/ENVFILE"
 +		TLOGDEVICE="/home/vagrant/bankapp/TLOG"
@@ -66,11 +65,10 @@
 -		ULOGPFX="<APPDIR2>/ULOG"
 +		TUXCONFIG="/home/vagrant/bankapp/tuxconfig"
 +		ULOGPFX="/home/vagrant/bankapp/ULOG"
-+
  #
  *GROUPS
  #
-@@ -68,33 +67,37 @@
+@@ -68,33 +64,33 @@
  #
  # Group for Application Queue (/Q) Servers
  #
@@ -80,7 +78,6 @@
 +QGRP1	LMID=SITE1	GRPNO=102
 +	TMSNAME=TMS_QM	TMSCOUNT=2
 +	OPENINFO="TUXEDO/QM:/home/vagrant/bankapp/qdevice:QSP_BANKAPP"
-+
   
  #
  # Group for Application Manager's Servers
@@ -98,11 +95,9 @@
  BANKB1		LMID=SITE1	GRPNO=1
 -	OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo1/tuxdemo1+SesTm=60+DbgFl=15+LogDir=."
 +		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
-+
  BANKB2		LMID=SITE2	GRPNO=2
 -	OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo2/tuxdemo2+SesTm=60+DbgFl=15+LogDir=."
 +		OPENINFO="Oracle_XA:Oracle_XA+SqlNet=racdba+Acc=P/scott/tiger+SesTm=60+DbgFl=15+LogDir=."
-+
  
  *NETWORK
 -SITE1	NADDR="<network address of SITE1>"
@@ -112,16 +107,15 @@
 -	BRIDGE="<device of provider2>"
 -	NLSADDR="<network listener address of SITE2>"
 +SITE1	NADDR="//collaba1.racattack:7700"
-+ 	NLSADDR="//collaba1.racattack:7710"
++	NLSADDR="//collaba1.racattack:7710"
 +	MINENCRYPTBITS=0 MAXENCRYPTBITS=0
 +SITE2	NADDR="//collaba2.racattack:7700"
-+ 	NLSADDR="//collaba2.racattack:7710"
++	NLSADDR="//collaba2.racattack:7710"
 +	MINENCRYPTBITS=0 MAXENCRYPTBITS=0
-+
  *SERVERS
  #
  # TUXEDO System /T server providing application specific authentication.
-@@ -108,32 +111,32 @@
+@@ -108,32 +104,32 @@
  # dequeues messages on behalf of programs calling tpenqueue(3) and
  # tpdequeue(3) respectively. Ref. TMQUEUE(5).
  #
@@ -166,21 +160,3 @@
   
  #
  # TUXEDO System /T Metadata Repository Server that manages application
-@@ -183,14 +186,14 @@
- TBALC_BID	PRIO=30		ROUTING=b_id
- *ROUTING
- ACCOUNT_ID	FIELD=ACCOUNT_ID
--		BUFTYPE="FML"
-+		BUFTYPE="FML32"
- 		RANGES="10000-59999:BANKB1,
- 			60000-109999:BANKB2"
- BRANCH_ID	FIELD=BRANCH_ID
--		BUFTYPE="FML"
-+		BUFTYPE="FML32"
- 		RANGES="1-5:BANKB1,
- 			6-10:BANKB2"
- b_id		FIELD=b_id
--		BUFTYPE="VIEW:aud"
-+		BUFTYPE="VIEW32:aud"
- 		RANGES="1-5:BANKB1,
- 			6-10:BANKB2"

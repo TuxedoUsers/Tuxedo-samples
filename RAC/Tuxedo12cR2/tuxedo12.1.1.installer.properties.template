@@ -1,0 +1,31 @@
+INSTALLER_UI=silent
+### Locale ###
+USER_LOCALE=en
+### Oracle Home Directory ###
+ORACLEHOME=<PRODUCT_HOME>
+### Product Installation Directory ###
+USER_INSTALL_DIR=<PRODUCT_HOME>/tuxedo12.1.1.0.0
+### LDAP Service Name ###
+#LDAP_HOSTNAME=pcwiz.mydomain.com
+### LDAP PortID ###
+#LDAP_PORTID=389
+### LDAP BaseObject ###
+#LDAP_BASE_OBJECT="o=beasys.com"
+### LDAP Filter File Location ###
+#LDAP_FILTER_FILE=/home/user/oracle/tuxedo12cR1/udataobj/security/bea_ldap_filter.dat
+### Tlisten Password ###
+TLISTEN_PASSWORD=<TLISTEN_PASSWORD>
+### Valid Install Sets, select one:###
+### CHOSEN_INSTALL_SET=Full###
+### CHOSEN_INSTALL_SET=Server###
+### CHOSEN_INSTALL_SET=Client###
+### CHOSEN_INSTALL_SET=ATMI###
+### CHOSEN_INSTALL_SET=CORBA###
+### CHOSEN_INSTALL_SET=Jolt###
+### NOTE: Spaces should not be included after the install set name. ### 
+### If there are spaces after the install set name, the installation ###
+### process uses the default mode Full Install. ###
+CHOSEN_INSTALL_SET=Full
+### Install Samples Y/N###
+INSTALL_SAMPLES=Yes
+
