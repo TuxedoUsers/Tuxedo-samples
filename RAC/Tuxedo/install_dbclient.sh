@@ -48,7 +48,7 @@ sudo mv tnsnames.ora /usr/lib/oracle/${icver}/client64
 cat << EOF >> ~/.bashrc
 export LD_LIBRARY_PATH=/usr/lib/oracle/${icver}/client64/lib:$LD_LIBRARY_PATH
 export LIBPATH=/usr/lib/oracle/${icver}/client64/lib:$LIBPATH
-export PATH=/usr/lib/oracle/$icver}/client64/bin:$PATH
+export PATH=/usr/lib/oracle/${icver}/client64/bin:$PATH
 export TNS_ADMIN=/usr/lib/oracle/${icver}/client64
 EOF
 #
