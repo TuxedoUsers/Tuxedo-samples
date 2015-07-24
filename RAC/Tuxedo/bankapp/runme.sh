@@ -78,11 +78,8 @@ fi
 ./crqueue
 
 #
-# Start tlisten if needed
-if [ "$MODEL" = 'mp' ]
-  then
-    do_both "sh starttlisten.sh"
-fi
+# Start tlisten
+do_both "sh starttlisten.sh"
 
 #
 # Boot the application
