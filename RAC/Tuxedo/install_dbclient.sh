@@ -50,6 +50,7 @@ export LD_LIBRARY_PATH=/usr/lib/oracle/${icver}/client64/lib:$LD_LIBRARY_PATH
 export LIBPATH=/usr/lib/oracle/${icver}/client64/lib:$LIBPATH
 export PATH=/usr/lib/oracle/${icver}/client64/bin:$PATH
 export TNS_ADMIN=/usr/lib/oracle/${icver}/client64
+export ICVER=${icver}
 EOF
 #
 # Replace reference to $ORACLE_HOME in Tuxedo RM file

@@ -1,5 +1,5 @@
---- bankapp_orig/ubbmp	2009-02-19 09:53:56.000000000 -0600
-+++ bankapp_mp/ubbmp	2015-07-22 20:05:59.740461031 -0500
+--- orig_bankapp/ubbmp	2009-02-19 09:53:56.000000000 -0600
++++ new_bankapp/ubbmp	2015-07-28 21:22:44.960842621 -0500
 @@ -19,45 +19,41 @@
  
  *RESOURCES
@@ -160,3 +160,21 @@
   
  #
  # TUXEDO System /T Metadata Repository Server that manages application
+@@ -183,14 +179,14 @@
+ TBALC_BID	PRIO=30		ROUTING=b_id
+ *ROUTING
+ ACCOUNT_ID	FIELD=ACCOUNT_ID
+-		BUFTYPE="FML"
++		BUFTYPE="FML32"
+ 		RANGES="10000-59999:BANKB1,
+ 			60000-109999:BANKB2"
+ BRANCH_ID	FIELD=BRANCH_ID
+-		BUFTYPE="FML"
++		BUFTYPE="FML32"
+ 		RANGES="1-5:BANKB1,
+ 			6-10:BANKB2"
+ b_id		FIELD=b_id
+-		BUFTYPE="VIEW:aud"
++		BUFTYPE="VIEW32:aud"
+ 		RANGES="1-5:BANKB1,
+ 			6-10:BANKB2"

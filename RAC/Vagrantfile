@@ -16,9 +16,9 @@ VAGRANTFILE_API_VERSION = "2"
 #### BEGIN CUSTOMIZATION ####
 #############################
 #define number of nodes
-num_APPLICATION       = 1
+num_APPLICATION       = 2
 num_LEAF_INSTANCES    = 0
-num_DB_INSTANCES      = 1
+num_DB_INSTANCES      = 2
 #
 #define number of cores for guest
 num_CORE              = 2
@@ -194,6 +194,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if ENV['setup']
           config.vm.provision "shell", privileged: false, :inline => "bash /media/sf_tuxedo/install_tux.sh #{ENV['tuxver']}"
           config.vm.provision "shell", privileged: false, :inline => "bash /media/sf_tuxedo/install_dbclient.sh #{ENV['icver']}"
+          config.vm.provision "shell", privileged: false, :inline => "bash /media/sf_tuxedo/install_cleanup.sh #{ENV['tuxver']} #{ENV['icver']}"
       end
     end
   end

@@ -1,5 +1,5 @@
---- /media/sf_tuxedo/bankapp_orig/bankapp.mk	2009-02-19 15:53:56.000000000 +0000
-+++ bankapp.mk	2015-07-15 20:20:16.860237093 +0000
+--- orig_bankapp/bankapp.mk	2009-02-19 09:53:56.000000000 -0600
++++ new_bankapp/bankapp.mk	2015-07-28 19:35:58.300935481 -0500
 @@ -6,7 +6,7 @@
  # ORACLE definitions
  #
@@ -170,7 +170,7 @@
 -	$(ORACLE_HOME)/bin/proc include=$(ORACLE_HOME)/precomp/public \
 -	include=$(TUXDIR)/include \
 +	proc \
-+	include="(${TUXDIR}/include,/usr/include/oracle/12.1/client64)" \
++	include="(${TUXDIR}/include,/usr/include/oracle/${ICVER}/client64)" \
  	-DANSI_PRO_C mode=ansi code=ansi_c \
  	ireclen=132 oreclen=132 select_error=no sqlcheck=limited \
  	userid=$(ORACLE_USER) iname=$<
@@ -180,8 +180,8 @@
  .pc.o:
 -	$(ORACLE_HOME)/bin/proc include=$(ORACLE_HOME)/precomp/public \
 -	include=$(TUXDIR)/include \
-+	proc include=/usr/include/oracle/12.1/client64 \
-+	include="($(TUXDIR)/include,/usr/include/oracle/12.1/client64)" \
++	proc include=/usr/include/oracle/${ICVER}/client64 \
++	include="($(TUXDIR)/include,/usr/include/oracle/${ICVER}/client64)" \
  	-DANSI_PRO_C mode=ansi code=ansi_c \
  	ireclen=132 oreclen=132 select_error=no sqlcheck=limited \
  	userid=$(ORACLE_USER) iname=$<

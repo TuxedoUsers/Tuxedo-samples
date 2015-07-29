@@ -1,0 +1,13 @@
+Steps to use emcc.example.com with Tuxedo racattack:
+
+1) Add network controller to EM VM.  Use Host-only adapter connected to vboxnet1 (same as Vagrant machines)
+
+2) Configure the adapter to have a fixed address of 192.168.78.200
+
+3) Add entry in /etc/host for emcc.example.com on each Vagrant node
+
+4) On the database nodes, chmod g+w /u01
+
+5) Set the password for the oracle account on each node to something (em needs the credentials)
+
+
