@@ -1,42 +1,35 @@
 #
-# Dockerfile for Tuxedo 12.1.3 ZIP Distro
+# Dockerfile template for Tuxedo 12.1.3
 # 
-# Download the following files:
+# Download the following files to an empty directory:
 #   tuxedo121300_64_Linux_01_x86.zip	from http://www.oracle.com/technetwork/middleware/tuxedo/downloads/index.html
-#   p19927652_121300_Linux-x86-64.zip 	or whatever the latest Tuxedo rolling patch is from My Oracle Support
-#   tuxedo12.1.3_silent_install.sh	from github
-#   tuxedo12.1.3.rsp 			from github
-#   simpapp_runme.sh			from github
-#   start_tlisten.sh			from github
+#   p22090512_121300_Linux-x86-64.zip 	or whatever the latest Tuxedo rolling patch is from My Oracle Support
 #
-# and put them in the same dir as this Dockerfile
+# Download and unzip into the same directory
+#   tuxedo_docker.zip			from https://github.com/TuxedoUsers/Tuxedo-samples/tree/master/docker
 #
 #
 
 # Pull base image
-FROM oraclelinux:6.5
+FROM oraclelinux
 
 MAINTAINER Todd Little <toddjlittle@gmail.com>
 
 # Core install doesn't include unzip or gcc, add them
-RUN yum -y install unzip gcc
+RUN yum -y install unzip gcc file; yum -y clean all
 
 # Create the installation directory tree and user tuxtest with a password of tuxtest
-RUN groupadd -g 1000 tuxtest
-RUN useradd -b /home -m -g tuxtest -u 1000 -s /bin/bash tuxtest
-RUN echo tuxtest:tuxtest | chpasswd
-RUN echo root:samplesvm | chpasswd
+RUN groupadd -g 1000 tuxtest; useradd -b /home -m -g tuxtest -u 1000 -s /bin/bash tuxtest; echo tuxtest:tuxtest | chpasswd; echo root:samplesvm | chpasswd
 
-ADD tuxedo12.1.3_silent_install.sh tuxedo12.1.3.rsp /home/tuxtest/Downloads/
-ADD <KIT_LOCATION>/p19927652_121300_Linux-x86-64.zip <KIT_LOCATION>/tuxedo121300_64_Linux_01_x86.zip /home/tuxtest/Downloads/
-#ADD simpapp_runme.sh start_tlisten.sh /home/tuxtest/
+ADD tuxedo12.1.3_silent_install.sh tuxedo12.1.3.rsp p*_121300_Linux-x86-64.zip tuxedo121300_64_Linux_01_x86.zip <KIT_LOCATION>/
+ADD simpapp_runme.sh start_tlisten.sh /home/tuxtest/
 
 RUN chown tuxtest:tuxtest -R /home/tuxtest
-WORKDIR /home/tuxtest/Downloads/
+WORKDIR <KIT_LOCATION>
 USER tuxtest
 
 # Install Tuxedo, SALT, and TSAM Agent
-RUN sh tuxedo12.1.3_silent_install.sh p19927652_121300_Linux-x86-64.zip tuxedo121300_64_Linux_01_x86.zip
+RUN sh tuxedo12.1.3_silent_install.sh p*_121300_Linux-x86-64.zip tuxedo121300_64_Linux_01_x86.zip
 ENV TUXDIR /home/tuxtest/tuxHome/tuxedo12.1.3.0.0
 
 # Clean up installer files
