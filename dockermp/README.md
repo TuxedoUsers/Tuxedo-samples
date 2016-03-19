@@ -15,14 +15,14 @@ It is based on the WebLogic Server dockerization (is that even a word?) done by 
 8. Execute the simpappmp_runme.sh script:  sh ../simpappmp_runme.sh
 9. You should now have a 3 node Tuxedo cluster with each node running a single copy of simpserv.
 10. If you want to verify that the load was executed on multiple nodes do:
-  1. tmadmin
-  2. > d site1
-  3. > psc
-  4. > d site2
-  5. > psc
-  6. > d site3
-  7. > psq
-  8. > q
+  a. tmadmin
+  b. > d site1
+  c. > psc
+  d. > d site2
+  e. > psc
+  f. > d site3
+  g. > psq
+  h. > q
 11. You should see that some of the client requests were done on one node, and some on another.
 
 Have fun!
