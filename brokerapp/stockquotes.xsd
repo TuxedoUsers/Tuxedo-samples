@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2007 sp2 (http://www.altova.com) by Raymond Shen (BEA) -->
+<s:schema xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:tns="http://www.webserviceX.NET/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://www.webserviceX.NET/" elementFormDefault="qualified">
+	<s:complexType name="StockType">
+		<s:sequence>
+			<s:element name="Symbol" type="s:string" minOccurs="0"/>
+			<s:element name="Last" type="s:float" minOccurs="0"/>
+			<s:element name="Date" type="s:string" minOccurs="0"/>
+			<s:element name="Time" type="s:string" minOccurs="0"/>
+			<s:element name="Change" type="s:float" minOccurs="0"/>
+			<s:element name="Open" type="s:float" minOccurs="0"/>
+			<s:element name="High" type="s:float" minOccurs="0"/>
+			<s:element name="Low" type="s:float" minOccurs="0"/>
+			<s:element name="Volume" type="s:decimal" minOccurs="0"/>
+			<s:element name="MktCap" type="s:string" minOccurs="0"/>
+			<s:element name="PreviousClose" type="s:float" minOccurs="0"/>
+			<s:element name="PercentageChange" type="s:string" minOccurs="0"/>
+			<s:element name="AnnRange" type="s:string" minOccurs="0"/>
+			<s:element name="Earns" type="s:float" minOccurs="0"/>
+			<s:element name="P-E" type="s:float" minOccurs="0"/>
+			<s:element name="Name" type="s:string" minOccurs="0"/>
+		</s:sequence>
+	</s:complexType>
+	<s:element name="StockQuotes">
+		<s:complexType>
+			<s:sequence>
+				<s:element name="Stock" maxOccurs="unbounded" type="tns:StockType"/>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+</s:schema>

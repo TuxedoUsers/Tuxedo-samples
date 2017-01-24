@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TJSconfig>
+	<ClassPaths>
+		<ClassPath>/home/oracle/app/oracle/product/11.2.0/dbhome_1/ucp/lib/ucp.jar</ClassPath>
+		<ClassPath>/home/oracle/app/oracle/product/11.2.0/dbhome_1/jdbc/lib/ojdbc6.jar</ClassPath>
+		<ClassPath>/home/vmuser/application/brokerapp</ClassPath>
+	</ClassPaths>
+
+	<Resources>
+		<FieldTable32Classes>bankflds,brokerflds, eventflds</FieldTable32Classes>
+	</Resources>
+
+	<DataSources>
+		<DataSource name="oracle">
+			<DriverClass>oracle.jdbc.xa.client.OracleXADataSource</DriverClass>
+			<JdbcDriverParams>
+				<ConnectionUrl>jdbc:oracle:thin:@//tuxdemo.demobox:1521/tuxdemo</ConnectionUrl>
+			</JdbcDriverParams>
+		</DataSource>
+	</DataSources>
+
+	<TuxedoServerClasses>
+		<TuxedoServerClass name="TJS_BROKER">
+			<Services>
+				<Service name="BR_BUY_STOCK" target="BuyStock"></Service>
+				<Service name="BR_SELL_STOCK" target="SellStock"></Service>
+			</Services>
+		</TuxedoServerClass>
+	</TuxedoServerClasses>
+</TJSconfig>

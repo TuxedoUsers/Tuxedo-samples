@@ -1,0 +1,18 @@
+#	(c) 2007 BEA Systems, Inc. All Rights Reserved.
+
+
+# Fields for brokerapp
+# name                         number  type    flags   comments
+BROKERAGE_ACNT                 500     string  -       -
+SYMBOL                         501     string  -       -
+QUANTITY                       502     long    -       -
+PRICE                          503     float   -       -
+STATUS                         504     string  -       -
+BANK_ACNT                      505     string  -       -
+CASH_BALANCE                   506     float   -       -
+COMPANY                        507     string  -       -
+COST                           508     float   -       -
+TOTAL                          509     float   -       -
+NET                            510     float   -       -
+ACNT_TOTAL                     511     float   -       -
+HOLDINGS                       512     fml32   -       -

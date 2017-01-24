@@ -1,0 +1,40 @@
+*base 15000 
+
+#name	rel-number	type	flags	comment
+#----	---------- ----	------	-------
+REQUEST_URI	1	string	-	
+PATH_INFO	2	string	-	
+QUERY_STRING	3	string	-	
+POST_DATA	4	string	-	
+PATH_TRANSLATED	5	string	-	
+SCRIPT_FILENAME	6	string	-	
+SCRIPT_NAME	7	string	-	
+REQUEST_METHOD	8	string	-	
+HTTP_COOKIE	9	string	-	
+DOCUMENT_ROOT	10	string	-	
+CONTENT_LENGTH	11	long	-	
+CONTENT_TYPE	12	string	-	
+SERVER_PROTOCOL	13	string	-	
+SERVER_ADMIN	14	string	-	
+GATEWAY_INTERFACE	15	string	-	
+SERVER_PORT	16	string	-	
+REMOTE_ADDR	17	string	-	
+HTTP_ACCEPT_LANGUAGE	18	string	-	
+HTTP_ACCEPT_CHARSET	19	string	-	
+SERVER_NAME	20	string	-	
+SERVER_ADDR	21	string	-	
+SERVER_SIGNATURE	22	string	-	
+SERVER_SOFTWARE	23	string	-	
+HTTP_ACCEPT	24	string	-	
+HTTP_ACCEPT_ENCODING	25	string	-	
+HTTP_HOST	26	string	-	
+HTTP_USER_AGENT	27	string	-	
+HTTP_CONNECTION	28	string	-	
+HTTP_CACHE_CONTROL	29	string	-	
+REMOTE_PORT	30	string	-	
+
+# response headers
+STATUS_LINE	100	string	-
+LOCATION	101	string	-
+RESPONSE_DATA	102	carray	-
+RESPONSE_CODE	103	long

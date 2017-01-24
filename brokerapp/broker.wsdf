@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="http://www.bea.com/Tuxedo/WSDF/2007" name="broker" wsdlNamespace="http://www.bea.com/Tuxedo/demo">
+    <WSBinding id="BrokerBinding">
+        <Servicegroup id="BrokerPortType">
+            <Service name="BR_OPEN_ACNT"></Service>
+            <Service name="BR_CLOSE_ACNT"></Service>
+            <Service name="BR_ADD_HOLDING"></Service>
+            <Service name="BR_DEL_HOLDING"></Service>
+            <Service name="BR_ACNT_LIST"></Service>
+            <Service name="BR_BUY_STOCK"></Service>
+            <Service name="BR_SELL_STOCK"></Service>
+            <Service name="BR_ACNT_SUM"></Service>
+            <Service name="BR_CHECK_ACNT"></Service>
+            <Service name="WITHDRAWAL"></Service>
+            <Service name="OPEN_ACCT"></Service>
+            <Service name="DEPOSIT"></Service>
+            <Service name="INQUIRY"></Service>
+        </Servicegroup>
+        <SOAP style="document" use="literal">
+            <AccessingPoints>
+                <Endpoint address="http://tuxedo.demo:8630/Broker"
+		id="BrokerHTTPPort"></Endpoint>
+            </AccessingPoints>
+        </SOAP>
+    </WSBinding>
+</Definition>

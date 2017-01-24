@@ -1,0 +1,19 @@
+#!/bin/sh
+rm -f UL*
+
+export TUXJMX_DEBUG=0-3
+
+ps -ef|grep tlisten|grep 3050|grep -v grep|awk '{print "kill -9 "$2}'|sh
+ps -ef|grep tlisten|grep 3060|grep -v grep|awk '{print "kill -9 "$2}'|sh
+
+sleep 1
+cd /home/tsam/application/brokerapp/site1
+. ./setenv
+tlisten -j "rmi://tuxedo.demo:3055" -l "//tuxedo.demo:3050" 
+
+cd /home/tsam/application/brokerapp/site2
+PMID=tuxedo.demo-2; export PMID
+. ./setenv
+
+tlisten -j "rmi://tuxedo.demo:3065" -l "//tuxedo.demo:3060" 
+

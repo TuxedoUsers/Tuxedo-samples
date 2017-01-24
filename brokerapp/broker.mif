@@ -1,0 +1,332 @@
+service=BR_OPEN_ACNT
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_OPEN_ACNT
+
+    param=BANK_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=out
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+service=BR_CLOSE_ACNT
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_CLOSE_ACNT
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+service=BR_ADD_HOLDING
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_ADD_HOLDING
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=SYMBOL
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=QUANTITY
+    type=long
+    access=in
+    requiredcount=1
+    count=1
+
+    param=COST
+    type=float
+    access=in
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+
+service=BR_DEL_HOLDING
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_DEL_HOLDING
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=SYMBOL
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+service=BR_ACNT_LIST
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_ACNT_LIST
+
+    param=STATUS
+    type=string
+    access=in
+    requiredcount=0
+    count=1
+    
+    param=BROKERAGE_ACNT
+    type=string
+    access=out
+    requiredcount=0
+    count=0
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+service=BR_BUY_STOCK
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_BUY_STOCK
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=SYMBOL
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=QUANTITY
+    type=long
+    access=inout
+    requiredcount=1
+    count=1
+    
+    param=PRICE
+    type=float
+    access=in
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+service=BR_SELL_STOCK
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_SELL_STOCK
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=SYMBOL
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=QUANTITY
+    type=long
+    access=inout
+    requiredcount=1
+    count=1
+    
+    param=PRICE
+    type=float
+    access=in
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+service=BR_ACNT_SUM
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+tuxservice=BR_ACNT_SUM
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=BROKERAGE_ACNT
+    type=string
+    access=out
+    requiredcount=1
+    count=1
+
+    param=BANK_ACNT
+    type=string
+    access=out
+    requiredcount=1
+    count=1
+
+    param=CASH_BALANCE
+    type=float
+    access=out
+    requiredcount=1
+    count=1
+    
+    param=HOLDINGS
+    type=fml32
+    access=out
+    requiredcount=0
+    count=1
+    (
+        param=QUANTITY
+	type=long
+	access=out
+        requiredcount=1
+	count=0
+
+	param=SYMBOL
+	type=string
+	access=out
+	requiredcount=1
+	count=0
+    
+        param=COMPANY
+	type=string
+	access=out
+	requiredcount=1
+	count=0
+
+	param=COST
+	type=float
+	access=out
+	requiredcount=1
+	count=0
+	
+	param=PRICE
+	type=float
+	access=out
+	requiredcount=1
+	count=0
+
+	param=TOTAL
+	type=float
+	access=out
+	requiredcount=1
+	count=0
+
+	param=NET
+	type=float
+	access=out
+	requiredcount=1
+	count=0
+    )
+
+    param=ACNT_TOTAL
+    type=float
+    access=out
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=outerr
+    requiredcount=1
+    count=1
+
+
+service=BR_CHECK_ACNT
+export=y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+
+    param=SSN
+    type=string
+    access=in
+    requiredcount=1
+    count=1
+
+    param=STATUS
+    type=string
+    access=out
+    requiredcount=1
+    count=1
+
+    param=ACCOUNT_ID
+    type=long
+    access=out
+    requiredcount=1
+    count=1
+

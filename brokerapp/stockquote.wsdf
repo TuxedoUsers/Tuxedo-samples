@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definition xmlns="http://www.bea.com/Tuxedo/WSDF/2007" name="stockquote" wsdlNamespace="http://www.webserviceX.NET/">
+	<WSBinding id="StockQuoteSoap">
+		<Servicegroup id="StockQuoteSoap">
+			<Service name="GetQuote" soapAction="http://www.webserviceX.NET/GetQuote"/>
+		</Servicegroup>
+		<SOAP version="1.1" style="document" use="literal">
+			<AccessingPoints>
+				<Endpoint id="StockQuoteSoap" address="http://www.webservicex.net/stockquote.asmx"/>
+				<Endpoint id="StockQuoteSoapLocal" address="http://tuxedo.demo:8081/stockquote/services/StockQuoteSoap"/>
+			</AccessingPoints>
+		</SOAP>
+	</WSBinding>
+</Definition>

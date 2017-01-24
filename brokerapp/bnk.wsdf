@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	(c) 2007 BEA Systems, Inc. All Rights Reserved.
+	Copyright (c) 2007 BEA Systems, Inc.
+	All Rights Reserved.
+
+	THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF
+	BEA Systems, Inc.
+	The copyright notice above does not evidence any
+	actual or intended publication of such source code.
+
+	ident	"@(#) TuxWS/samples/wsrmapp/tux/bankapp.wsdf.template	$Revision: 1.3 $"
+-->
+<Definition xmlns="http://www.bea.com/Tuxedo/WSDF/2007" name="bankappsvc" wsdlNamespace="urn:bankappsvc.wsdl">
+	<WSBinding id="bankappsvc_Binding">
+		<Servicegroup id="bankappsvc_PortType">
+			<Policy location="TuxBankAppRMpolicy.xml"></Policy>
+			<!-- Example:
+				Absolute path: location="/home/me/salt/wsrmapp/TuxBankAppRMploicy.xml"
+				or
+				Current path: location="TuxBankAppRMploicy.xml"
+			-->
+			<Service name="WITHDRAWAL"></Service>
+			<Service name="TRANSFER"></Service>
+			<Service name="DEPOSIT"></Service>
+			<Service name="INQUIRY"></Service>
+		</Servicegroup>
+		<SOAP>
+			<AccessingPoints>
+				<Endpoint id="bankappsvc_bankapp_HTTPPort" address="http://@GWWS_HOST@:@GWWS_PORT@/bankappsvc"/>
+			</AccessingPoints>
+		</SOAP>
+	</WSBinding>
+</Definition>

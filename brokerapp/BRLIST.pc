@@ -1,0 +1,708 @@
+/*	(c) 2007 BEA Systems, Inc. All Rights Reserved. */
+
+#include <stdio.h>		/* UNIX */
+#include <string.h>		/* UNIX */
+#include <stdlib.h>
+
+#include <atmi.h>		/* TUXEDO */
+#include <userlog.h>		/* TUXEDO */
+/* #include <Uunix.h> */		/* TUXEDO */
+
+#ifdef _TMFML32
+#include <fml32.h>		/* TUXEDO */
+#include <fml1632.h>		/* TUXEDO */
+#include <Usysfl32.h>		/* TUXEDO */
+#else
+#include <fml.h>		/* TUXEDO */
+#include <Usysflds.h>		/* TUXEDO */
+#endif
+
+#include "brokerflds.h"		/* broker fields */
+#include "bankflds.h"		/* bankapp fields */
+
+/*
+#include "stockquote.fml32.h"
+#include "stockquotes.fml32.h"
+*/
+
+#define BIGBLOCKLEN (2048 * 20)
+#define BLOCKLEN 2048
+
+EXEC SQL include sqlca;
+
+#define SQLCODE    sqlca.sqlcode
+#define SQL_OK     0
+#define SQL_NOROWS 100
+#define DEBUG
+
+EXEC SQL begin declare section;	/* sql declares must be global */
+
+static long br_account_id;	/* brokerage account id */
+static long account_id;
+static long quantity;
+static float avg_price;
+static char symbol[20];
+
+EXEC SQL end declare section;
+
+
+extern char *getstr(char *, long);
+
+int get_balance(long bank_account, float * balancePtr)
+{
+	FBFR32 * req;
+	FBFR32 * res = NULL;
+	FLDLEN32 reslen = 0;
+	char tmpbuf[BLOCKLEN];
+	FLDLEN32 length = BLOCKLEN;
+	
+	req = (FBFR32 *)tpalloc("FML32", NULL, BLOCKLEN);
+	if ( req == (FBFR32 *)NULL )
+	{
+		userlog("tpalloc failed in get_balance.\n");
+		return -1;
+	}
+	Finit32(req, BLOCKLEN);
+	Fchg32(req, Fldid32("ACCOUNT_ID"), 0, (char *)&bank_account, sizeof(long));
+
+	Fprint32(req);
+
+	res = (FBFR32 *)tpalloc("FML32", NULL, BLOCKLEN);
+	if ( res == (FBFR32 *)NULL )
+	{
+		userlog("tpalloc failed in get_balance.\n");
+		return -1;
+	}
+	Finit32(res, BLOCKLEN);
+	reslen = BLOCKLEN;
+
+	if ( tpcall("INQUIRY", (char *)req, 0, (char **)&res, (long *)&reslen, TPSIGRSTRT) < 0 )
+	{
+		userlog("Call INQUIRY failed %s", tpstrerror(tperrno));
+		tpfree((char *)req);
+		return -1;
+	}
+	tpfree((char *)req);
+	/*
+	Fget32(FBFR32 *, FLDID32 , FLDOCC32 , char *, FLDLEN32 *)
+	*/
+	Fprint32(res);
+	if ( Fget32(res, Fldid32("SBALANCE"), 0, tmpbuf, (FLDLEN32 *)&length) < 0 )
+	{
+		userlog("Fget32 error.%s\n", Fstrerror32(Ferror32));
+		return -1;
+	}
+	sscanf(tmpbuf, "$%f", balancePtr);	
+/*
+	memcpy(balancePtr, tmpbuf, sizeof(float));
+*/
+	return 0;
+}
+
+FBFR32 * get_quote( char * symbols )
+{
+    long        rlen = 4096;
+    int         ret;
+    char        err_str[180];
+    int         exit_code = 0;
+
+    FBFR32 *    reqfmlptr = NULL, *repfmlptr = NULL;
+    FBFR32 *    getquoteptr = NULL;
+    FBFR32 * quoteresponseptr = NULL;
+    FLDLEN32 quoteresponselen = 1024;
+    char * xmlbuf = NULL;
+    FLDLEN32 xmlbuflen = 1024;
+    FBFR32 * quotesptr = NULL;
+    FLDLEN32 quoteslen = 1024;
+    FBFR32 * stockptr = NULL;
+    FLDLEN32 stocklen = 1024;
+
+    /* Construct the requst buffer*/
+    if ( (reqfmlptr = (FBFR32 *) tpalloc("FML32", NULL, 64)) == NULL ) {
+        (void) fprintf( stderr, "Unable to allocate FML32 datatype:%s\n",tpstrerror(tperrno));
+        return NULL;
+    }
+    if ( (getquoteptr = (FBFR32 *) tpalloc("FML32", NULL, 1024)) == NULL ) {
+        (void) fprintf( stderr, "Unable to allocate FML32 datatype:%s\n",tpstrerror(tperrno));
+    tpfree((char*)reqfmlptr);
+        return NULL;
+    }
+
+    Fchg32(getquoteptr,Fldid32("symbol"),0,(char*)symbols,0);
+    Fchg32(reqfmlptr,Fldid32("GetQuote"),0,(char*)getquoteptr,0);
+
+    (void) printf("The input buffer ->\n");
+    Fprint32(reqfmlptr);
+
+    /* Alloc the reply buffer*/
+    if ( (repfmlptr = (FBFR32 *) tpalloc("FML32", NULL, 1024)) == NULL ) {
+        (void) fprintf( stderr, "Unable to allocate FML32 datatype:%s\n",tpstrerror(tperrno));
+    tpfree((char *)reqfmlptr);
+    tpfree((char *)getquoteptr);
+        return NULL;
+    }
+    /* Call the GetQuote service*/
+    ret=tpcall("GetQuote",(char *)reqfmlptr,1,(char **)&repfmlptr,&rlen,TPNOTIME|TPNOTRAN);
+
+    if ( ret  == -1){
+    (void) fprintf(stderr, "tpcall(%s) failed:%s\n","GetQuote",tpstrerror(tperrno));
+    tpfree((char *)reqfmlptr);
+    tpfree((char *)getquoteptr);
+    tpfree((char *)repfmlptr);
+    return NULL;
+    }
+
+    tpfree((char *)reqfmlptr);
+    tpfree((char *)getquoteptr);
+
+    printf( "The output buffer ->\n");
+
+    Fprint32(repfmlptr);
+
+    /* Get the GetQuoteResponse */
+    if ((quoteresponseptr = (FBFR32 *) tpalloc("FML32", NULL, 1024)) == NULL )
+    {
+        (void) fprintf( stderr, "Unable to allocate FML32 datatype:%s\n",Fstrerror32(Ferror32));
+    tpfree((char *)repfmlptr);
+        return NULL;
+    }
+
+    ret = Fget32(repfmlptr,Fldid32("GetQuoteResponse"),0, (char *) quoteresponseptr,&quoteresponselen);
+    if ( ret  == -1){
+    (void) fprintf(stderr, "Fget32 failed:%s\n",tpstrerror(tperrno));
+    tpfree((char *)repfmlptr);
+    tpfree((char *)quoteresponseptr);
+    return NULL;
+    }
+    /* Get the GetQuoteResult */
+    if ((xmlbuf = (char *) tpalloc((char *)"XML", NULL, 1024)) == NULL) {
+    (void) fprintf( stderr, "Unable to allocate XML datatype:%s\n",tpstrerror(tperrno));
+    tpfree((char *)repfmlptr);
+    tpfree((char *)quoteresponseptr);
+    return NULL;
+    }
+
+    ret = Fget32(quoteresponseptr,Fldid32("GetQuoteResult"),0, (char *) xmlbuf,&xmlbuflen);
+    if ( ret  == -1){
+    (void) fprintf(stderr, "Fget32 failed:%s\n",Fstrerror32(Ferror32));
+    tpfree((char *)repfmlptr);
+    tpfree((char *)quoteresponseptr);
+    tpfree(xmlbuf);
+    return NULL;
+    }
+
+    tpfree((char *)repfmlptr);
+    tpfree((char *)quoteresponseptr);
+
+    /* Convert XML buffer in to FML32 */
+    if ( (quotesptr = (FBFR32 *) tpalloc("FML32", NULL, 1024)) == NULL ) {
+        (void) fprintf( stderr, "Unable to allocate FML32 datatype:%s\n",tpstrerror(tperrno));
+    tpfree(xmlbuf);
+        return NULL;
+    }
+
+    ret = tpxmltofml32(xmlbuf,NULL,&quotesptr,NULL,0);
+    if ( ret  == -1)
+	{
+    	(void) fprintf(stderr, "tpxmltofml32 failed:%s\n%s\n", tpstrerror(tperrno),Fstrerror32(Ferror32));
+	    tpfree(xmlbuf);
+    	tpfree((char *)quotesptr);
+	    return NULL;
+    }
+    tpfree(xmlbuf);
+/* #ifdef DEBUG */
+    Fprint32(quotesptr);
+/* #endif */
+
+    if ( (stockptr = (FBFR32 *) tpalloc("FML32", NULL, 1024)) == NULL ) {
+        (void) fprintf( stderr, "Unable to allocate FML32 datatype:%s\n",tpstrerror(tperrno));
+    	tpfree((char*)quotesptr);
+        return NULL;
+    }
+
+    ret = Fget32(quotesptr,Fldid32("Stock"),0, (char *) stockptr,&stocklen);
+
+    if ( ret  == -1){
+    	(void) fprintf(stderr, "Fget32 Stock failed:%s\n%s\n", tpstrerror(tperrno),Fstrerror32(Ferror32));
+	    tpfree(xmlbuf);
+    	tpfree((char *)quotesptr);
+	    return NULL;
+    }
+#ifdef DEBUG
+    Fprint32(stockptr);
+#endif
+
+	return stockptr;
+}
+
+
+/*
+ * Service to get a list of brokerage accounts
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_ACNT_LIST(TPSVCINFO *transb)
+
+#else
+
+BR_ACNT_LIST(transb)
+TPSVCINFO *transb;
+#endif
+
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	int num_accounts = 0;
+	char brokerage_acnt[16];
+	char status[80];
+
+	transf = (FBFR *)transb->data;	/* Set pointer to TPSVCINFO data buffer  */
+	
+	/*
+	* Get Brokerage accounts
+	*/
+
+	EXEC SQL declare d11cur cursor for
+		select BR_ACCOUNT_ID from BRACCOUNT;
+	EXEC SQL open d11cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	for (;;) {
+		EXEC SQL fetch d11cur into :br_account_id;
+		if (SQLCODE != SQL_OK) {
+			break;
+		}
+		
+		num_accounts++;
+		sprintf(brokerage_acnt, "%d", br_account_id);
+		Fadd(transf, BROKERAGE_ACNT, brokerage_acnt, (FLDLEN)0);
+	}
+
+	EXEC SQL close d11cur;
+	
+	/* prepare buffer for successful return */
+
+	sprintf(status, "%d Brokerage Accounts found", num_accounts);
+	userlog("%s",status);
+	(void)Fchg(transf, STATUS, 0, status,(FLDLEN)0);	
+	
+	tpreturn (TPSUCCESS, 0, transb->data, 0L, 0);
+}
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+GET_QUOTE(TPSVCINFO *rqst)
+#else
+GET_QUOTE(rqst)
+TPSVCINFO *rqst;
+#endif
+{
+    char * ptr = NULL;
+    float price = 0;
+    
+    FBFR32 * stockFml32 = NULL;
+    FLDID32 fieldId32 = FIRSTFLDID;
+    FLDLEN32 len32 = 0;
+    
+    strcpy(symbol, rqst->data);
+	stockFml32 = get_quote(symbol);
+	if ( stockFml32 == NULL )
+	{
+	    userlog("Fail to visit the stock quote service.***%s***\n", symbol);
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+    
+	fieldId32 = Fldid32("Last");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field Last.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	ptr = Fgetalloc32(stockFml32, fieldId32, 0, &len32);
+	if ( ptr == NULL )
+	{
+	    userlog("Fail to get the content of the FML32 field Last.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	memcpy((void*)&price, ptr, sizeof(float));
+    
+    userlog("price: %f\n" , price);
+	(void)sprintf(rqst->data, "%f", price);
+    tpreturn(TPSUCCESS, 0, rqst->data, 0L, 0);
+}
+
+/*
+ * Service to get a list of brokerage accounts
+ */
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_ACNT_SUM(TPSVCINFO *rqst)
+#else
+BR_ACNT_SUM(rqst)
+TPSVCINFO *rqst;
+#endif
+{
+    char tuxType[BLOCKLEN], tuxSubType[BLOCKLEN];
+    char * ptr = NULL;
+    char tmpbuf[BIGBLOCKLEN];
+    char brokerage_acnt[BLOCKLEN];
+    FBFR32 * input = NULL;
+    FBFR32 * output = NULL;
+    FBFR32 * holdings = NULL;
+    FBFR32 * stockFml32 = NULL;
+    FLDID32 fieldId32 = FIRSTFLDID;
+    FLDOCC32 oc32 = 0;
+    FLDLEN32 len32 = 0;
+    float cash_balance = 0, acnt_total = 0;
+    float cost = 0, price = 0, total = 0, net = 0;
+    int h_flag = 0;
+    int loop = 0;
+	
+    if ( tptypes(rqst->data, tuxType, tuxSubType) < 0 )
+    {
+	userlog("The received data is error.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    if ( strncmp(tuxType, "FML32", 6) ) 
+    {
+	userlog("The received data's type is error.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    input = (FBFR32 *)rqst->data;
+    fieldId32 = Fldid32("BROKERAGE_ACNT");
+    if ( fieldId32 == BADFLDID )
+    {
+	userlog("Fail to get the FML32 ID for the field BROKERAGE_ACNT.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    /*
+      Fget32(FBFR32 *, FLDID32, FLDOCC32, char *, FLDLEN32 *)
+    */
+    len32 = BLOCKLEN;
+    if ( Fget32(input, fieldId32, 0, brokerage_acnt, (FLDLEN32 *)&len32) < 0 )
+    {
+	userlog("Fget32 failed.\n");
+        tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    br_account_id=atol(brokerage_acnt);
+
+
+    output = (FBFR32 *)tpalloc("FML32", NULL, BIGBLOCKLEN);
+    if ( output == NULL )
+    {
+	userlog("Fail to alloc the memory for the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+	
+    if ( Fadd32(output, fieldId32, brokerage_acnt, len32) < 0 )
+    {
+	userlog("Fail to add the value into the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+
+    fieldId32 = Fldid32("BANK_ACNT");
+    if ( fieldId32 == BADFLDID )
+    {
+	userlog("Fail to get the FML32 ID for the field BANK_ACNT.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    EXEC SQL declare d13cur cursor for
+	select ACCOUNT_ID from BRACCOUNT where BR_ACCOUNT_ID = :br_account_id;
+    (void) userlog("SQLCODE after declare: %d",SQLCODE); 
+    (void) userlog("SQLCODE == SQL_OK?: %d",SQLCODE==SQL_OK); 
+    EXEC SQL open d13cur;
+    (void) userlog("d13cur opened"); 
+
+    if (SQLCODE != SQL_OK) {
+	userlog("Fail to visit database11111.\n");
+        tpreturn(TPFAIL, 0, NULL, 0L, 0);
+    }
+    EXEC SQL fetch d13cur into :account_id;
+    EXEC SQL close d13cur;
+    sprintf(tmpbuf, "%d", account_id);
+    len32 = strlen(tmpbuf);
+    ptr = tmpbuf;	
+    if ( Fadd32(output, fieldId32, ptr, len32) < 0 )
+    {
+	userlog("Fail to add the value into the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+
+    fieldId32 = Fldid32("CASH_BALANCE");
+    if ( fieldId32 == BADFLDID )
+    {
+	userlog("Fail to get the FML32 ID for the field CASH_BALANCE.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    if ( get_balance(account_id, &cash_balance) < 0 )
+    {
+	userlog("Fail to get the CASH BALANCE.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    acnt_total = cash_balance;
+    len32 = sizeof(cash_balance);
+    ptr = (char *)&cash_balance;
+    if ( Fadd32(output, fieldId32, ptr, len32) < 0 )
+    {
+	userlog("Fail to add the value into the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+
+
+/*  Embeded FML32  */
+    EXEC SQL declare d12cur cursor for
+	select SYMBOL,QUANTITY,AVG_PRICE from BRHOLDING where BR_ACCOUNT_ID = :br_account_id;
+    EXEC SQL open d12cur;
+    if (SQLCODE != SQL_OK) {
+	userlog("Fail to visit database22222, SQLCODE=%d, %s.\n", SQLCODE, sqlca.sqlerrm);
+        tpreturn(TPFAIL, 0, NULL, 0L, 0);
+    }
+
+    holdings = (FBFR32 *)tpalloc("FML32", NULL, BLOCKLEN * 10);
+    if ( holdings == NULL )
+    {
+	userlog("Fail to alloc the memory for the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+
+    for ( oc32 = 0; ; oc32++ )
+    {
+    	EXEC SQL fetch d12cur into :symbol, :quantity, :avg_price;
+	if (SQLCODE != SQL_OK)
+	    break;
+	h_flag ++;
+		
+	loop = 0;
+	for ( ;; )
+	{
+	    if ( symbol[loop] == ' ' || symbol[loop] == '\n' )
+	    {
+		symbol[loop] = 0;
+		break;
+	    }
+	    if ( symbol[loop] == 0 )
+		break;
+	    loop ++;
+	}
+
+	fieldId32 = Fldid32("SYMBOL");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	ptr = symbol;
+	len32 = strlen(ptr) + 1;
+	if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	stockFml32 = get_quote(symbol);
+	if ( stockFml32 == NULL )
+	{
+	    userlog("Fail to visit the stock quote service.***%s***\n", symbol);
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	fieldId32 = Fldid32("QUANTITY");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	ptr = (char *)&quantity;
+	len32 = (FLDLEN32)sizeof(quantity);
+	if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	fieldId32 = Fldid32("Name");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field BROKERAGE_ACNT.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	/*
+	  Fget32(FBFR32 *, FLDID32 , FLDOCC32 , char *, FLDLEN32 *)
+	*/
+	ptr = Fgetalloc32(stockFml32, fieldId32, 0, &len32);
+	if ( ptr == NULL )
+	{
+	    userlog("Fail to get the content of the FML32 field BROKERAGE_ACNT.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	fieldId32 = Fldid32("COMPANY");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+        if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	fieldId32 = Fldid32("COST");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	ptr = (char *)&avg_price;
+	len32 = sizeof(avg_price);
+	if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	fieldId32 = Fldid32("Last");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field BROKERAGE_ACNT.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	ptr = Fgetalloc32(stockFml32, fieldId32, 0, &len32);
+	if ( ptr == NULL )
+	{
+	    userlog("Fail to get the content of the FML32 field BROKERAGE_ACNT.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	memcpy((void*)&price, ptr, sizeof(float));
+	fieldId32 = Fldid32("PRICE");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+
+	fieldId32 = Fldid32("TOTAL");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	total = price * quantity;
+	ptr = (char *)&total;
+	len32 = sizeof(total);
+	if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+        acnt_total += total;
+        
+	fieldId32 = Fldid32("NET");
+	if ( fieldId32 == BADFLDID )
+	{
+	    userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+	net = total - avg_price * quantity;
+	ptr = (char *)&net;
+	len32 = sizeof(net);
+	if ( Fadd32(holdings, fieldId32, ptr, len32) < 0 )
+	{
+	    userlog("Fail to add the value into the FML32 typed buffer.\n");
+	    tpreturn(TPFAIL, 0, NULL, 0, 0);
+	}
+    }   /*  for  */
+
+    fieldId32 = Fldid32("HOLDINGS");
+    if ( fieldId32 == BADFLDID )
+    {
+	userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    if (h_flag) {
+		if ( Fadd32(output, fieldId32, holdings, BLOCKLEN) < 0 )
+		{
+		userlog("Fail to add the value into the FML32 typed buffer.\n");
+		tpreturn(TPFAIL, 0, NULL, 0, 0);
+		}
+	} else {
+		tpfree(holdings);
+	}
+
+    EXEC SQL close d12cur;
+
+    fieldId32 = Fldid32("ACNT_TOTAL");
+    if ( fieldId32 == BADFLDID )
+    {
+	userlog("Fail to get the FML32 ID for the field ACNT_TOTAL.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    ptr = (char *)&acnt_total;
+    len32 = sizeof(acnt_total);
+    if ( Fadd32(output, fieldId32, ptr, len32) < 0 )
+    {
+	userlog("Fail to add the value into the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+
+    fieldId32 = Fldid32("STATUS");
+    if ( fieldId32 == BADFLDID )
+    {
+	userlog("Fail to get the FML32 ID for the field STATUS.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+    if ( h_flag == 0 )
+    {
+	sprintf(tmpbuf, "%s", "No Holdings");
+    }
+    else
+	sprintf(tmpbuf, "%s", "Holdings");
+    ptr = tmpbuf;
+    len32 = strlen(tmpbuf) + 1;
+    if ( Fadd32(output, fieldId32, ptr, len32) < 0 )
+    {
+	userlog("Fail to add the value into the FML32 typed buffer.\n");
+	tpreturn(TPFAIL, 0, NULL, 0, 0);
+    }
+
+    tpreturn (TPSUCCESS, 0, (char *)output, 0L, 0);
+}
+
+
+/*
+ * Service to post user message
+ */
+void
+#if defined(__STDC__) || defined(__cplusplus)
+POST_EVENT(TPSVCINFO *rqst)
+#else
+POST_EVENT(rqst)
+TPSVCINFO *rqst;
+#endif
+{
+	char event[256];
+	FBFR *transf;
+
+	transf = (FBFR *)rqst->data;
+
+	event[0] = '\0';
+	strcpy(event, "BROKER_TRANSACTION");
+
+	if (tppost(event, (char *)transf, 0L, TPNOTRAN | TPSIGRSTRT) == -1) {
+		tpreturn(TPFAIL, 0, (char *)transf, 0L, 0);
+	}
+
+	tpreturn(TPSUCCESS, 0, (char *)transf, 0L, 0);
+}
+
+/* End of file */

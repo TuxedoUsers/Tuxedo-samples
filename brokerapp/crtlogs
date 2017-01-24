@@ -1,0 +1,19 @@
+echo "Creating site1 TLOG"
+cd /home/tsam/application/brokerapp/site1
+. ./setenv
+tmadmin <<!
+echo
+crdl -b 2000 -z /home/tsam/application/brokerapp/site1/TLOG
+crlog -m SITE1
+q
+!
+echo "Creating site2 TLOG"
+#cd /home/tsam/application/brokerapp/site2
+#. ./setenv
+#export
+tmadmin <<!
+echo
+crdl -b 2000 -z /home/tsam/application/brokerapp/site2/TLOG
+crlog -m SITE2
+q
+!

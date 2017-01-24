@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    (c) 2007 BEA Systems, Inc. All Rights Reserved.
+    Copyright (c) 2007 BEA Systems, Inc.
+      All Rights Reserved
+
+    THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF
+    BEA Systems, Inc.
+    The copyright notice above does not evidence any
+    actual or intended publication of such source code.
+
+ident   "@(#) samples/salt/obcredmapp/tux/datamap.deploy    $Revision: 1.3 $"
+-->
+<Deployment xmlns="http://www.bea.com/Tuxedo/SALTDEPLOY/2007">
+	<WSDF>
+		<Import location="/home/tsam/application/brokerapp/stockquote.wsdf"/>
+		<Import location="/home/tsam/application/brokerapp/broker.wsdf"/>
+	</WSDF>
+	<WSGateway>
+		<GWInstance id="GW1">
+			<Outbound>
+				<Binding ref="stockquote:StockQuoteSoap">
+                     <Endpoint use="StockQuoteSoapLocal"/>
+				</Binding> 
+			</Outbound>
+			<Inbound>
+				<Binding ref="broker:BrokerBinding">
+					 <Endpoint use="BrokerHTTPPort"></Endpoint>
+				</Binding>
+			</Inbound>
+			<Properties/>
+		</GWInstance>
+	</WSGateway>
+	<System/>
+</Deployment>
+

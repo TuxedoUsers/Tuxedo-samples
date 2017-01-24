@@ -1,0 +1,300 @@
+/*	(c) 2007 BEA Systems, Inc. All Rights Reserved. */
+
+
+#include <stdio.h>		/* UNIX */
+#include <string.h>		/* UNIX */
+
+#include <atmi.h>		/* TUXEDO */
+#include <userlog.h>		/* TUXEDO */
+/* #include <Uunix.h> */              /* TUXEDO */
+
+#ifdef _TMFML32
+#include <fml32.h>		/* TUXEDO */
+#include <fml1632.h>		/* TUXEDO */
+#include <Usysfl32.h>		/* TUXEDO */
+#else
+#include <fml.h>		/* TUXEDO */
+#include <Usysflds.h>		/* TUXEDO */
+#endif
+
+#include "brokerflds.h"		/* broker fields */
+#include "bankflds.h"		/* bankapp fields */
+
+EXEC SQL include sqlca;
+
+#define SQLCODE    sqlca.sqlcode
+#define SQL_OK     0
+#define SQL_NOROWS 100
+
+
+EXEC SQL begin declare section;		/* sql declares must be global */
+
+static long account_id;  		/* bank account id */
+static long br_account_id;		/* brokerage account id */
+static long quantity;
+static long volume;
+static float avg_price;
+static float new_price;
+static char transaction[10];
+static char symbol[10];
+
+EXEC SQL end declare section;
+
+static char amts[16];			/* string to hold amount */
+static long newquantity;
+static float newprice;  
+
+
+extern char *getstr(char *, long);
+
+
+/*
+ * Service to add holdings
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_ADD_HOLDING(TPSVCINFO *transb)
+
+#else
+
+BR_ADD_HOLDING(transb)
+TPSVCINFO *transb;
+#endif
+
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	char brokerage_acnt[16];	/* string for brokerage account */
+	int insert = 0;
+	char sprice[16];
+	char squantity[16];
+	char *s;
+
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "Shares Added", (FLDLEN)0);
+	strcpy(transaction, "ADD");
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Brokerage Account */
+	
+	len = sizeof(brokerage_acnt);
+	brokerage_acnt[0] = '\0';
+	Fget(transf, BROKERAGE_ACNT, 0, brokerage_acnt, &len); 
+	(void)sscanf(brokerage_acnt, "%d", &br_account_id);
+	
+	/* Stock Symbol */
+	
+	len = sizeof(symbol);
+	symbol[0] = '\0';
+	Fget(transf, SYMBOL, 0, symbol, &len);
+	
+	/* Quantity of Stock */
+
+	len = sizeof(squantity);
+	squantity[0] = '\0';
+	Fgets(transf, QUANTITY, 0, squantity);
+	(void)sscanf(squantity, "%ld", &newquantity);
+	
+	if (newquantity < 1) {
+		(void)Fchg(transf, STATUS, 0, "Invalid Stock Quantity",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+	/* Price per share */
+
+	len = sizeof(sprice);
+	sprice[0] = '\0';
+	Fgets(transf, PRICE, 0, sprice);
+	if (strcmp(sprice,"") == 0) {
+		(void)Fchg(transf, STATUS, 0, "Invalid Stock Price",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	(void)sscanf(sprice,"%f",&newprice);
+
+	if (newprice <= 0.0) {
+		(void)Fchg(transf, STATUS, 0,
+		           "Invalid Stock Price",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	sprintf(amts, "%f", newquantity * newprice);
+
+	/*
+	* Purchase Shares
+	*/
+	
+	EXEC SQL declare d11cur cursor for
+		select SYMBOL from BRHOLDING
+			where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol;
+	EXEC SQL open d11cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("brholding",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d11cur into :symbol;
+	if (SQLCODE != SQL_OK) {			/* nothing found */
+		insert++;
+	}
+	EXEC SQL close d11cur;
+
+	if (insert) {
+		/*
+		* First Stock of This Type
+		*/
+		
+		quantity = newquantity;
+		avg_price = newprice;
+		
+		EXEC SQL insert into BRHOLDING (BR_ACCOUNT_ID, SYMBOL, QUANTITY, AVG_PRICE)
+			values
+				(:br_account_id, :symbol, :quantity, :avg_price);
+		if (SQLCODE != SQL_OK) {		/* Failure to insert */
+			(void)Fchg(transf, STATUS, 0, 
+				"Cannot update BRHOLDING", (FLDLEN)0);
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+		}
+	} else {
+		EXEC SQL declare d12cur cursor for
+			select QUANTITY, AVG_PRICE from BRHOLDING
+				where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol
+				for update of QUANTITY, AVG_PRICE;
+		EXEC SQL open d12cur;
+		if (SQLCODE != SQL_OK) {
+			(void)Fchg(transf, STATUS, 0, getstr("brholding",SQLCODE),(FLDLEN)0);
+			
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+		}
+		EXEC SQL fetch d12cur into :quantity, :avg_price;
+		if (SQLCODE != SQL_OK) {			/* nothing found */
+			(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+			EXEC SQL close d12cur;
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);		
+		}
+		
+		avg_price = (((quantity * avg_price) + (newquantity * newprice)) / (quantity + newquantity));
+		quantity = quantity + newquantity;
+		
+		EXEC SQL update BRHOLDING set QUANTITY = :quantity, AVG_PRICE = :avg_price where current of d12cur;
+		if (SQLCODE != SQL_OK) {			/* Failure to update */ 
+			(void)Fchg(transf, STATUS, 0,"Cannot update BRHOLDING for Stock purchase",(FLDLEN)0); 
+			EXEC SQL close d12cur;
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+		}
+		EXEC SQL close d12cur;
+	}
+
+	/* Insert history record */
+
+	volume = newquantity;
+	new_price = newprice;
+	EXEC SQL insert into BRHISTORY 
+		(BR_ACCOUNT_ID, SYMBOL, TRANSACTION, AVG_PRICE, QUANTITY) 
+		values 
+		(:br_account_id, :symbol, :transaction, :new_price, :volume);
+	if (SQLCODE != SQL_OK) {			/* Failure to insert */
+		(void)Fchg(transf, STATUS, 0, "Cannot update BRHISTORY",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	/* prepare buffer for successful return */
+
+	(void)Fchg(transf, PRICE, 0, (char *)&avg_price,(FLDLEN)0);
+	(void)Fchg(transf, QUANTITY, 0, (char *)&quantity,(FLDLEN)0);
+	
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+}
+
+
+/*
+ * Service to delete holdings
+ */
+ 
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_DEL_HOLDING(TPSVCINFO *transb)
+
+#else
+
+BR_DEL_HOLDING(transb)
+TPSVCINFO *transb;
+#endif
+
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	char brokerage_acnt[16];	/* string for brokerage account */
+	char sprice[16];
+	char *s;
+	char *Nostock = "Not enough Stock to sell";
+
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "Shares Removed", (FLDLEN)0);
+	strcpy(transaction, "REMOVE");
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Brokerage Account */
+	
+	len = sizeof(brokerage_acnt);
+	brokerage_acnt[0] = '\0';
+	Fget(transf, BROKERAGE_ACNT, 0, brokerage_acnt, &len);
+	(void)sscanf(brokerage_acnt, "%d", &br_account_id);
+	
+	/* Stock Symbol */
+	
+	len = sizeof(symbol);
+	symbol[0] = '\0';
+	Fget(transf, SYMBOL, 0, symbol, &len);
+
+	/*
+	* Calculate Stock Holding for Symbol
+	*/
+
+	EXEC SQL declare d21cur cursor for
+		select QUANTITY, AVG_PRICE from BRHOLDING
+			where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol;
+	EXEC SQL open d21cur;			/* open */
+	EXEC SQL fetch d21cur into :quantity, avg_price;		/* fetch */
+	if (SQLCODE != SQL_OK) {		/* nothing found */
+		Fchg(transf, STATUS, 0, "failed to retrieve stock quantity", (FLDLEN)0);
+		EXEC SQL close d21cur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	EXEC SQL close d21cur;
+
+	EXEC SQL delete from BRHOLDING
+		where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol;
+	if (SQLCODE != SQL_OK) {		/* nothing found */
+		Fchg(transf, STATUS, 0, "failed to delete stock quantity", (FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}	
+
+	EXEC SQL insert into BRHISTORY 
+		(BR_ACCOUNT_ID, SYMBOL, TRANSACTION, AVG_PRICE, QUANTITY) 
+		values 
+		(:br_account_id, :symbol, :transaction, :avg_price, :quantity);
+	if (SQLCODE != SQL_OK) {			/* Failure to insert */
+		(void)Fchg(transf, STATUS, 0, "Cannot update BRHISTORY",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	/* prepare buffer for successful return */
+
+	(void)Fchg(transf, QUANTITY, 0, (char *)&quantity,(FLDLEN)0);
+	
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);	
+}
+
+
+/* End of file */

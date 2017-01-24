@@ -1,0 +1,35 @@
+This sample is used to call remote webservice via GWWS's outbound facility.
+This sample runs with the bankapp. Please do the following procedure to run it.
+
+1. Set up the environment variable for GWWS.
+export FLDTBLDIR32=$APPDIR
+export FIELDTBLS32=$FIELDTBLS32,stockquote.fml32,stockquotes.fml32
+export XSDDIR=$APPDIR
+export XSDFILES=stockquote_1.xsd
+export SALTCONFIG=$APPDIR/saltconfig
+
+2. Generate the files from GWWS:
+After set the environment of Tuxedo, you can use following command to create
+the configure files and client application.
+   make 
+
+3. Copy stockquote.fml32, stockquotes.fml32 stockquote.rps and stockquote_1.xsd to bankapp
+   make install
+
+4. Edit the ubb configuration to add GWWS
+
+Add a group:
+GWWSGRP		GRPNO=100 LMID=SITE1
+
+Add servers for the GWWS outbound call:
+
+TMMETADATA SRVGRP=GWWSGRP SRVID=800
+    CLOPT = "-A -- -f <APPDIR>/stockquote.rps"
+
+GWWS    SRVGRP=GWWSGRP SRVID=900
+    CLOPT="-A --  -i GW1"
+
+4. Reload the ubbconfig and boot up the application. 
+
+5. Use Client to get the quote of "BEAS".
+   ./Client BEAS

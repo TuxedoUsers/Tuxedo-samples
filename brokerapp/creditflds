@@ -1,0 +1,17 @@
+#	(c) 2003 BEA Systems, Inc. All Rights Reserved.
+#Copyright (c) 1990 Unix System Laboratories, Inc.
+#All rights reserved
+#ident	"@(#) samples/atmi/bankapp/creditflds	$Revision: 1.5 $"
+
+# Fields for database creditdb
+# name			number  type    flags   comments
+C_ACCOUNT_ID		310     long    -       -       
+C_CRT_LINE		311     float	-
+C_BALANCE		312     float	-       used for dollar format
+C_ACCT_TYPE		319     char    -       -       
+#
+C_XA_TYPE		320     short   -       choice in MENU mask
+C_CURS			321     string  -       place holder in masks
+C_AMOUNT		322     string	-       -       
+C_BAMOUNT		323     string	-       -       
+C_CAMOUNT		324     string	-       -       

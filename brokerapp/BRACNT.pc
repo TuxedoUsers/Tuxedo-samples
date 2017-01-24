@@ -1,0 +1,368 @@
+/*	(c) 2007 BEA Systems, Inc. All Rights Reserved. */
+
+
+#include <stdio.h>		/* UNIX */
+#include <string.h>		/* UNIX */
+
+#include <atmi.h>		/* TUXEDO */
+#include <userlog.h>		/* TUXEDO */
+/* #include <Uunix.h> */              /* TUXEDO */
+
+#ifdef _TMFML32
+#include <fml32.h>		/* TUXEDO */
+#include <fml1632.h>		/* TUXEDO */
+#include <Usysfl32.h>		/* TUXEDO */
+#else
+#include <fml.h>		/* TUXEDO */
+#include <Usysflds.h>		/* TUXEDO */
+#endif
+
+#include "brokerflds.h"		/* broker fields */
+#include "bankflds.h"		/* bankapp fields */
+#include "creditflds.h"		/* credit fields */
+
+EXEC SQL include sqlca;
+
+#define SQLCODE    sqlca.sqlcode
+#define SQL_OK     0
+#define SQL_NOROWS 100
+
+
+EXEC SQL begin declare section;		/* sql declares must be global */
+
+static long account_id;  		/* bank account id */
+static long br_account_id;		/* brokerage account id */
+static char ssn[12];		/* string for bank account ssn number */
+
+EXEC SQL end declare section;
+
+
+extern char *getstr(char *, long);
+
+
+/*
+ * Service to open a new brokerage account
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_OPEN_ACNT(TPSVCINFO *transb)
+#else
+BR_OPEN_ACNT(transb)
+TPSVCINFO *transb;
+#endif
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	char account[16];		/* string for bank account */
+	FBFR *reqfb;			/* fielded buffer for request message */
+	int reqlen;			/* length of fielded buffer */
+	char *s;
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "Brokerage Account Opened", (FLDLEN)0);
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Bank account */
+	
+	len = sizeof(account);
+	account[0] = '\0';
+	Fget(transf, BANK_ACNT, 0, account, &len);
+	(void)sscanf(account, "%d", &account_id);
+	
+	/*
+	* Validate Bank account using INQUIRY service
+	*/
+
+	/* make inquiry request buffer */
+	if ((reqfb = (FBFR *)tpalloc(FMLTYPE, NULL, transb->len)) == (FBFR *)NULL) {
+		(void)userlog("tpalloc failed in BR_OPEN_ACCT\n");
+		(void)Fchg(transf, STATUS, 0,
+			   "unable to allocate request buffer", (FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}		
+
+	reqlen = (int)Fsizeof(reqfb);
+	(void)Finit(reqfb, (FLDLEN)reqlen);
+
+	/* put ID in request buffer */
+	(void)Fchg(reqfb, ACCOUNT_ID, 0, (char *)&account_id, (FLDLEN)0);
+
+	if (tpcall("INQUIRY", (char *)reqfb,0, (char **)&reqfb, 
+		   (long *)&reqlen, TPSIGRSTRT) == -1) {
+		if(tperrno == TPESVCFAIL && reqfb != NULL &&
+		   (s=Ffind(reqfb, STATLIN, 0, 0)) != NULL && *s)
+			(void)Fchg(transf, STATUS, 0, s, (FLDLEN)0);
+		else
+			(void)Fchg(transf, STATUS, 0, 
+			   "Cannot inquire bank account", (FLDLEN)0);
+		tpfree((char *)reqfb);
+		tpreturn(TPFAIL, 0,transb->data, 0L, 0);
+	}
+	tpfree((char *)reqfb);
+	
+	/*
+	* Set Brokerage Account Number the same as Bank account number
+	*/
+	
+	br_account_id = account_id;
+	
+	/*
+	* Check to see if brokerage account already exists
+	*/
+		
+	EXEC SQL declare d11cur cursor for
+		select BR_ACCOUNT_ID from BRACCOUNT
+			where BR_ACCOUNT_ID = :br_account_id;
+	EXEC SQL open d11cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d11cur into :br_account_id;
+	if (SQLCODE == SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, "Brokerage Account already exists",(FLDLEN)0);
+		EXEC SQL close d11cur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL close d11cur;
+
+    /* get account SSN by calling ACCT_SSN service */
+
+	/* make inquiry request buffer */
+	if ((reqfb = (FBFR *)tpalloc(FMLTYPE, NULL, transb->len)) == (FBFR *)NULL) {
+		(void)userlog("tpalloc failed in BR_OPEN_ACCT\n");
+		(void)Fchg(transf, STATUS, 0,
+			   "unable to allocate request buffer", (FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}		
+
+	reqlen = (int)Fsizeof(reqfb);
+	(void)Finit(reqfb, (FLDLEN)reqlen);
+
+	/* put ID in request buffer */
+	(void)Fchg(reqfb, ACCOUNT_ID, 0, (char *)&account_id, (FLDLEN)0);
+
+	if (tpcall("ACCT_SSN", (char *)reqfb,0, (char **)&reqfb, 
+		   (long *)&reqlen, TPSIGRSTRT) == -1) {
+		if(tperrno == TPESVCFAIL && reqfb != NULL &&
+		   (s=Ffind(reqfb, STATLIN, 0, 0)) != NULL && *s)
+			(void)Fchg(transf, STATUS, 0, s, (FLDLEN)0);
+		else
+			(void)Fchg(transf, STATUS, 0, 
+			   "Cannot inquire bank account ssn", (FLDLEN)0);
+		tpfree((char *)reqfb);
+		tpreturn(TPFAIL, 0,transb->data, 0L, 0);
+	}
+	len = sizeof(ssn);
+	ssn[0] = '\0';
+	Fget(reqfb, SSN, 0, ssn, &len);
+	tpfree((char *)reqfb);
+
+	/*
+	* Check the account SSN number
+		
+	EXEC SQL declare ssncur cursor for
+		select SSN from ACCOUNT
+			where ACCOUNT_ID = :account_id;
+	EXEC SQL open ssncur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("bankaccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch ssncur into :ssn;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, "fetch ssn failed",(FLDLEN)0);
+		EXEC SQL close ssncur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL close ssncur;
+	*/
+
+	/*
+	* Insert new account details
+	*/
+	EXEC SQL insert into BRACCOUNT 
+		(BR_ACCOUNT_ID, ACCOUNT_ID, SSN) 
+		values 
+		(:br_account_id, :account_id, :ssn);
+	if (SQLCODE != SQL_OK) {			/* Failure to insert */
+		(void)Fchg(transf, STATUS, 0, "Cannot update table BRACCOUNT",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	/*
+	* prepare buffer for successful return
+	*/
+	
+	(void)Fchg(transf, BROKERAGE_ACNT, 0, account, (FLDLEN)0);
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+}
+
+/*
+ * Service to close an account
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_CLOSE_ACNT(TPSVCINFO *transb)
+#else
+BR_CLOSE_ACNT(transb)
+TPSVCINFO *transb;
+#endif
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	char brokerage_acnt[16];	/* string for brokerage account */
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "Brokerage Account Closed", (FLDLEN)0);
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Brokerage Account */
+	
+	len = sizeof(brokerage_acnt);
+	brokerage_acnt[0] = '\0';
+	Fget(transf, BROKERAGE_ACNT, 0, brokerage_acnt, &len);
+	(void)sscanf(brokerage_acnt, "%d", &br_account_id);
+	
+	/*
+	* Check to see if brokerage account exists
+	*/
+	
+	EXEC SQL declare d21cur cursor for
+		select BR_ACCOUNT_ID from BRACCOUNT
+			where BR_ACCOUNT_ID = :br_account_id;
+	EXEC SQL open d21cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d21cur into :br_account_id;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, "Brokerage Account does not exist",(FLDLEN)0);
+		EXEC SQL close d21cur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}	
+	EXEC SQL close d21cur;
+
+	/*
+	* Delete Brokerage Account Holdings
+	*/
+	
+	EXEC SQL delete from BRHOLDING where BR_ACCOUNT_ID = :br_account_id;
+	if (SQLCODE != SQL_OK && SQLCODE != SQL_NOROWS) {
+		(void)Fchg(transf, STATUS, 0, "Cannot delete brokerage account holdings",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+	/*
+	* Delete Brokerage Account
+	*/
+	
+	EXEC SQL delete from BRACCOUNT where BR_ACCOUNT_ID = :br_account_id;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, "Cannot delete brokerage account",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+	/*
+	* Prepare buffer for successful return
+	*/
+	
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+}
+
+/*
+ * Service to check existence of a brokerage account according to SSN
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_CHECK_ACNT(TPSVCINFO *transb)
+#else
+BR_CHECK_ACNT(transb)
+TPSVCINFO *transb;
+#endif
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	FBFR *reqfb;			/* fielded buffer for request message */
+	int reqlen;			/* length of fielded buffer */
+	char *s;
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "0", (FLDLEN)0);  /* STATUS
+                                                       0: both bank and br account do not exist
+                                                       1: both bank and br account exist
+                                                       2: bank account exists, br account doesn't exist
+                                                    */
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Bank account */
+	len = sizeof(ssn);
+	ssn[0] = '\0';
+	Fget(transf, SSN, 0, ssn, &len);
+	
+	/*
+	* Check the br account status
+	*/
+		
+	EXEC SQL declare ssncur cursor for
+		select BR_ACCOUNT_ID from BRACCOUNT
+			where SSN = :ssn;
+	EXEC SQL open ssncur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch ssncur into :br_account_id;
+	if (SQLCODE == SQL_OK) {    /* br account exists, both exist */
+		(void)Fchg(transf, STATUS, 0, "1", (FLDLEN)0);
+		(void)Fchg(transf, ACCOUNT_ID, 0, (char *)&br_account_id, (FLDLEN)0);
+		EXEC SQL close ssncur;
+		tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL close ssncur;
+
+    /* Check the bank account status */
+	EXEC SQL declare bkcur cursor for
+		select ACCOUNT_ID from SSNACCT
+			where SSN = :ssn;
+	EXEC SQL open bkcur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch bkcur into :account_id;
+	if (SQLCODE == SQL_OK) {    /* bank account exists */
+		(void)Fchg(transf, STATUS, 0, "2", (FLDLEN)0);
+		(void)Fchg(transf, ACCOUNT_ID, 0, (char *)&account_id, (FLDLEN)0);
+		EXEC SQL close bkcur;
+		tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL close bkcur;
+
+
+	/*
+	* return with status 0
+	*/
+    account_id = -1;
+    (void)Fchg(transf, ACCOUNT_ID, 0, (char *)&account_id, (FLDLEN)0);
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+}
+
+
+/* End of file */

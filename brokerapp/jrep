@@ -1,0 +1,32 @@
+#!JOLT1.0
+add SVC/.GETALL:vs=1:ex=0:bt=FML32:bp:pn=PATTERN:pt=string:pf=167772164:pa=wr:ep:bp:pn=NRECS:pt=integer:pf=33554435:pa=rd:ep:bp:\
+pn=REPVALUE:pt=string:pf=167772162:po=0:pa=rd:ep:
+add SVC/.GETKEYS:vs=1:ex=1:bt=FML32:bp:pn=PATTERN:pt=string:pf=167772164:pa=wr:ep:bp:pn=NRECS:pt=integer:pf=33554435:pa=rd:ep:\
+bp:pn=REPNAME:pt=string:pf=167772161:po=0:pa=rd:ep:
+add SVC/.ADDREC:vs=1:ex=0:bt=FML32:bp:pn=REPVALUE:pt=string:pf=167772162:pa=wr:ep:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:
+add SVC/BROKER_TRANSACTION:bt=FML32:ex=0:BT=FML32:vs=1:bp:pf=167772161:po=1:pa=rw:pn=EVENT_TIME:pt=string:ep:bp:pf=167772162:\
+po=1:pa=rw:pn=STATUS:pt=string:ep:
+add SVC/TRANSFER:vs=1:ex=1:bt=FML:bp:pn=ACCOUNT_ID:pt=integer:pf=33554436:po=2:pa=wr:ep:bp:pn=SAMOUNT:pt=string:pf=167772166:\
+pa=wr:ep:bp:pn=SBALANCE:pt=string:pf=167772164:po=2:pa=rd:ep:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:bp:pn=FORMNAM:\
+pt=string:pf=167772165:pa=rd:ep:
+add SVC/BR_OPEN_ACNT:bt=FML32:ex=1:BT=FML32:vs=5:bp:pf=167772161:po=1:pa=rw:pn=BROKERAGE_ACNT:pt=string:ep:bp:pf=167772162:po=1:\
+pa=rw:pn=BANK_ACNT:pt=string:ep:bp:pf=167772163:po=1:pa=rw:pn=STATUS:pt=string:ep:
+add PKG/SIMPSERV:BR_OPEN_ACNT:BROKER_TRANSACTION:
+add SVC/WITHDRAWAL:vs=1:ex=1:bt=FML:bp:pn=ACCOUNT_ID:pt=integer:pf=33554436:pa=wr:ep:bp:pn=SAMOUNT:pt=string:pf=167772166:pa=wr:\
+ep:bp:pn=SBALANCE:pt=string:pf=167772164:pa=rd:ep:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:bp:pn=FORMNAM:pt=string:\
+pf=167772165:pa=rd:ep:
+add SVC/.GARBAGECOLLECT:vs=1:ex=0:bt=FML32:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:
+add SVC/.DELREC:vs=1:ex=0:bt=FML32:bp:pn=REPNAME:pt=string:pf=167772161:pa=wr:ep:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:
+add SVC/.FLUSHCACHE:vs=1:ex=0:bt=FML32:bp:pn=REPNAME:pt=string:pf=167772161:po=200:pa=wr:ep:
+add SVC/.NUMRECS:vs=1:ex=0:bt=FML32:bp:pn=NRECS:pt=integer:pf=33554435:pa=rd:ep:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:
+add PKG/BANKAPP:INQUIRY:DEPOSIT:WITHDRAWAL:TRANSFER:
+add SVC/INQUIRY:vs=1:ex=1:bt=FML:bp:pn=ACCOUNT_ID:pt=integer:pf=33554436:pa=wr:ep:bp:pn=SBALANCE:pt=string:pf=167772164:pa=rd:\
+ep:bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:bp:pn=FORMNAM:pt=string:pf=167772165:pa=rd:ep:
+add SVC/DEPOSIT:vs=1:ex=1:bt=FML:bp:pn=ACCOUNT_ID:pt=integer:pf=33554436:pa=wr:ep:bp:pn=SAMOUNT:pt=string:pf=167772166:pa=wr:ep:\
+bp:pn=SBALANCE:pt=string:pf=167772164:pa=rd:ep:bp:pn=BALANCE:pt=float:pf=100663303:pa=rd:ep:bp:pn=STATLIN:pt=string:\
+pf=167772163:pa=rd:ep:bp:pn=FORMNAM:pt=string:pf=167772165:pa=rd:ep:
+add SVC/.GETSVC:vs=1:ex=0:bt=FML32:bp:pn=REPNAME:pt=string:pf=167772161:pa=wr:ep:bp:pn=REPVALUE:pt=string:pf=167772162:pa=rd:ep:\
+bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:
+add SVC/.GETREC:vs=1:ex=0:bt=FML32:bp:pn=REPNAME:pt=string:pf=167772161:pa=wr:ep:bp:pn=REPVALUE:pt=string:pf=167772162:pa=rd:ep:\
+bp:pn=STATLIN:pt=string:pf=167772163:pa=rd:ep:
+

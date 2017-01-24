@@ -1,0 +1,46 @@
+#	Copyright (c) 2007 BEA Systems, Inc.
+
+
+#
+# This file sets the environment variables needed to build brokerapp
+#
+
+#
+# Location of the Application
+#
+APPDIR=/users/gary/brokerapp
+export APPDIR
+
+#
+# Location of the Tuxedo installation
+#
+TUXDIR=/tux9/tuxedo9.0
+export TUXDIR
+
+#
+# Set FML related environment variables
+# Remember to change if using FML32.
+#
+FIELDTBLS=Usysflds,bankflds,brokerflds
+FLDTBLDIR=$TUXDIR/udataobj:$APPDIR
+
+#
+# Set Oracle Environment variables
+#
+ORACLE_HOME=/oracle/OraHome1
+ORACLE_SID=XE
+export ORACLE_HOME ORACLE_SID
+PATH=$ORACLE_HOME/bin:$PATH
+LD_LIBRARY_PATH=$ORACLE_HOME/lib32:$LD_LIBRARY_PATH
+export PATH LD_LIBRARY_PATH
+
+#
+# Set environment for C Compiler
+#
+PATH=/opt/SUNWspro/bin:/usr/ccs/bin:$PATH
+export PATH
+
+#
+# Add Tuxedo environment
+#
+. $TUXDIR/tux.env

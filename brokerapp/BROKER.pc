@@ -1,0 +1,613 @@
+/*	(c) 2007 BEA Systems, Inc. All Rights Reserved. */
+
+
+#include <stdio.h>		/* UNIX */
+#include <string.h>		/* UNIX */
+#include <time.h>		/* UNIX */
+
+#include <atmi.h>		/* TUXEDO */
+#include <userlog.h>		/* TUXEDO */
+/*#include <Uunix.h>*/              /* TUXEDO */
+
+#ifdef _TMFML32
+#include <fml32.h>		/* TUXEDO */
+#include <fml1632.h>		/* TUXEDO */
+#include <Usysfl32.h>		/* TUXEDO */
+#else
+#include <fml.h>		/* TUXEDO */
+#include <Usysflds.h>		/* TUXEDO */
+#endif
+
+#include <stdlib.h>		/* UNIX */
+#ifdef WIN32
+#include <Windows.h>		/* WINDOWS */
+#include <process.h>		/* WINDOWS */
+#define srand48(A) srand((unsigned int)A)
+#define drand48() ((float)(((float)rand())/32768.0))
+#else
+#include <unistd.h>		/* UNIX */
+#endif
+
+#include "brokerflds.h"		/* broker fields */
+#include "bankflds.h"		/* bankapp fields */
+#include "eventflds.h"		/* event fields */
+
+EXEC SQL include sqlca;
+
+#define SQLCODE    sqlca.sqlcode
+#define SQL_OK     0
+#define SQL_NOROWS 100
+
+
+#define PRIORITY 50
+
+
+EXEC SQL begin declare section;		/* sql declares must be global */
+
+static long account_id;  		/* bank account id */
+static long br_account_id;		/* brokerage account id */
+static long quantity;
+static long volume;
+static float avg_price;
+static float new_price;
+static char transaction[10];
+static char symbol[10];
+
+EXEC SQL end declare section;
+
+static char amts[16];			/* string to hold amount */
+static long newquantity;
+static float newprice;  
+
+static post_msg[128];
+
+extern char *getstr(char *, long);
+
+static void delay(long);
+static void post_event(char *, char *);
+
+/*
+ * Service to buy stock
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_BUY_STOCK(TPSVCINFO *transb)
+
+#else
+BR_BUY_STOCK(transb)
+TPSVCINFO *transb;
+#endif
+
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	FBFR *reqfb;			/* fielded buffer for request message */
+	int reqlen;			/* length of fielded buffer */
+	char amts[16];			/* string for withdrawal ammount */
+	float db_bal;			/* withdrawal account balance */
+	char db_amts[16];		/* string for withdrawal account balance   */
+	char brokerage_acnt[16];	/* string for brokerage account */
+	int insert = 0;
+	char sprice[16];
+	char squantity[16];
+	char *s;
+
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "Shares Purchased", (FLDLEN)0);
+	strcpy(transaction, "BUY");
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Brokerage Account */
+	
+	len = sizeof(brokerage_acnt);
+	brokerage_acnt[0] = '\0';
+	Fget(transf, BROKERAGE_ACNT, 0, brokerage_acnt, &len);
+	(void)sscanf(brokerage_acnt, "%d", &br_account_id);
+	
+	/* Stock Symbol */
+	
+	len = sizeof(symbol);
+	symbol[0] = '\0';
+	Fget(transf, SYMBOL, 0, symbol, &len);	
+	
+	/* Quantity of Stock */
+
+	len = sizeof(squantity);
+	squantity[0] = '\0';
+	Fgets(transf, QUANTITY, 0, squantity);
+	(void)sscanf(squantity, "%ld", &newquantity);
+	
+	if (newquantity < 1) {
+		(void)Fchg(transf, STATUS, 0, "Invalid Stock Quantity",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	/* Price per share */
+
+	len = sizeof(sprice);
+	sprice[0] = '\0';
+	Fgets(transf, PRICE, 0, sprice);
+	if (strcmp(sprice,"") == 0) {
+		(void)Fchg(transf, STATUS, 0, "Invalid Stock Price",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	(void)sscanf(sprice,"%f",&newprice);
+
+	if (newprice <= 0.0) {
+		(void)Fchg(transf, STATUS, 0,
+		           "Invalid Stock Price",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	sprintf(amts, "%f", newquantity * newprice);
+
+	//delay(br_account_id);
+	
+	/*
+	* Get bank account corresponding to brokerage account
+	*/
+
+	EXEC SQL declare d11cur cursor for
+		select ACCOUNT_ID from BRACCOUNT
+			where BR_ACCOUNT_ID = :br_account_id;
+	EXEC SQL open d11cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d11cur into :account_id;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		EXEC SQL close d11cur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	EXEC SQL close d11cur;
+
+        /*
+        * Assume we have sufficient funds in Account
+        */
+	
+	EXEC SQL declare d12cur cursor for
+		select SYMBOL from BRHOLDING
+			where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol;
+	EXEC SQL open d12cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("brholding",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d12cur into :symbol;
+	if (SQLCODE != SQL_OK) {			/* nothing found */
+		insert++;
+	}
+	EXEC SQL close d12cur;		
+
+	if (insert) {
+		/*
+		* First Stock of This Type
+		*/
+		
+		quantity = newquantity;
+		avg_price = newprice;
+		
+		EXEC SQL insert into BRHOLDING (BR_ACCOUNT_ID, SYMBOL, QUANTITY, AVG_PRICE)
+			values
+				(:br_account_id, :symbol, :quantity, :avg_price);
+		if (SQLCODE != SQL_OK) {		/* Failure to insert */
+			(void)Fchg(transf, STATUS, 0, 
+				"Cannot update BRHOLDING", (FLDLEN)0);
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+		}
+	} else {
+		EXEC SQL declare d13cur cursor for
+			select QUANTITY, AVG_PRICE from BRHOLDING
+				where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol
+				for update of QUANTITY, AVG_PRICE;
+		EXEC SQL open d13cur;
+		if (SQLCODE != SQL_OK) {
+			(void)Fchg(transf, STATUS, 0, getstr("brholding",SQLCODE),(FLDLEN)0);
+			
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+		}
+		EXEC SQL fetch d13cur into :quantity, :avg_price;
+		if (SQLCODE != SQL_OK) {			/* nothing found */
+			(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+			EXEC SQL close d13cur;
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);		
+		}
+	        /* (void)userlog ("braccount"); */
+		
+		avg_price = (((quantity * avg_price) + (newquantity * newprice)) / (quantity + newquantity));
+		quantity = quantity + newquantity;
+		
+		EXEC SQL update BRHOLDING set QUANTITY = :quantity, AVG_PRICE = :avg_price where current of d13cur;
+		if (SQLCODE != SQL_OK) {			/* Failure to update */ 
+			(void)Fchg(transf, STATUS, 0,"Cannot update BRHOLDING for Stock purchase",(FLDLEN)0); 
+			EXEC SQL close d13cur;
+			tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+		}
+		EXEC SQL close d13cur;
+	}
+
+	/*
+	* Withdraw funds from Account
+	*/
+	
+	/* make withdraw request buffer */
+	if ((reqfb = (FBFR *)tpalloc(FMLTYPE, NULL, transb->len)) == (FBFR *)NULL) {
+		(void)userlog("tpalloc failed in BR_BUY_STOCK\n");
+		(void)Fchg(transf, STATUS, 0,
+			   "unable to allocate request buffer", (FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}		
+
+	reqlen = (int)Fsizeof(reqfb);
+	(void)Finit(reqfb, (FLDLEN)reqlen);
+
+	/* put ID in request buffer */
+	(void)Fchg(reqfb, ACCOUNT_ID, 0, (char *)&account_id, (FLDLEN)0);
+
+	/* put amount in request buffer */
+	(void)Fchg(reqfb, SAMOUNT, 0, amts, (FLDLEN)0);
+
+	/* increase the priority of withdraw call */
+	if (tpsprio(PRIORITY, 0L) == -1)
+		(void)userlog("Unable to increase priority of withdrawal\n");
+
+
+	if (tpcall("WITHDRAWAL", (char *)reqfb,0, (char **)&reqfb, 
+		   (long *)&reqlen, TPSIGRSTRT) == -1) {
+		if(tperrno == TPESVCFAIL && reqfb != NULL &&
+		   (s=Ffind(reqfb, STATLIN, 0, 0)) != NULL && *s)
+			(void)Fchg(transf, STATUS, 0, s, (FLDLEN)0);
+		else
+			(void)Fchg(transf, STATUS, 0, 
+			   "Cannot withdraw from bank account", (FLDLEN)0);
+		tpfree((char *)reqfb);
+		tpreturn(TPFAIL, 0,transb->data, 0L, 0);
+	}
+
+
+	/* get "withdrawal" balance from return buffer */
+
+	(void)strcpy(db_amts, Fvals((FBFR *)reqfb, SBALANCE, 0));
+	(void)sscanf(db_amts, "$%f", &db_bal);
+	if ((db_amts == NULL) || (db_bal < 0.0)) {
+		(void)Fchg(transf, STATUS, 0, 
+			   "illegal withdrawal account balance", (FLDLEN)0);
+		tpfree((char *)reqfb);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	tpfree((char *)reqfb);
+	
+	sprintf(post_msg, "Account %d bought %d %s @ %6.2f",
+		br_account_id, newquantity, symbol, newprice);
+		
+	/* Insert history record */
+
+	volume = newquantity;
+	new_price = newprice;
+	EXEC SQL insert into BRHISTORY 
+		(BR_ACCOUNT_ID, SYMBOL, TRANSACTION, AVG_PRICE, QUANTITY) 
+		values 
+		(:br_account_id, :symbol, :transaction, :new_price, :volume);
+	if (SQLCODE != SQL_OK) {			/* Failure to insert */
+		(void)Fchg(transf, STATUS, 0, "Cannot update BRHISTORY",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+    post_event("BROKER_TRANSACTION", post_msg);
+
+	/* prepare buffer for successful return */
+
+	(void)Fchg(transf, PRICE, 0, (char *)&avg_price,(FLDLEN)0);
+	(void)Fchg(transf, QUANTITY, 0, (char *)&quantity,(FLDLEN)0);
+
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);
+}
+
+
+
+/*
+ * Service to sell stock
+ */
+
+void
+#if defined(__STDC__) || defined(__cplusplus)
+BR_SELL_STOCK(TPSVCINFO *transb)
+
+#else
+BR_SELL_STOCK(transb)
+TPSVCINFO *transb;
+#endif
+
+{
+	FBFR *transf;			/* fielded buffer of decoded message */
+	FLDLEN len;
+	FBFR *reqfb;			/* fielded buffer for request message */
+	int reqlen;			/* length of fielded buffer */
+	char amts[16];			/* string for withdrawal ammount */
+	char brokerage_acnt[16];	/* string for brokerage account */
+	char sprice[16];
+	char squantity[16];
+	char *s;
+	char *Nostock = "Not enough Stock to sell";
+
+	
+	transf = (FBFR *)transb->data;	/* set pointer to TPSVCINFO data buffer */
+	
+	(void)Fchg(transf, STATUS, 0, "Shares Sold", (FLDLEN)0);
+	strcpy(transaction, "SELL");
+	
+	/*
+	* Get all values for service request from fielded buffer
+	*/
+
+	/* Brokerage Account */
+	
+	len = sizeof(brokerage_acnt);
+	brokerage_acnt[0] = '\0';
+	Fget(transf, BROKERAGE_ACNT, 0, brokerage_acnt, &len); 
+	(void)sscanf(brokerage_acnt, "%d", &br_account_id);
+	
+	/* Stock Symbol */
+	
+	len = sizeof(symbol);
+	symbol[0] = '\0';
+	Fget(transf, SYMBOL, 0, symbol, &len);
+	
+	/* Quantity of Stock */
+
+	len = sizeof(squantity);
+	squantity[0] = '\0';
+	Fgets(transf, QUANTITY, 0, squantity);
+	(void)sscanf(squantity, "%ld", &newquantity);
+	
+	if (newquantity < 1) {
+		(void)Fchg(transf, STATUS, 0, "Invalid Stock Quantity",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+	/* Price per share */
+
+	len = sizeof(sprice);
+	sprice[0] = '\0';
+	Fgets(transf, PRICE, 0, sprice);
+	if (strcmp(sprice,"") == 0) {
+		(void)Fchg(transf, STATUS, 0, "Invalid Stock Price",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	(void)sscanf(sprice,"%f",&newprice);
+
+	if (newprice <= 0.0) {
+		(void)Fchg(transf, STATUS, 0,
+		           "Invalid Stock Price",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	sprintf(amts, "%f", newquantity * newprice);
+
+	//delay(br_account_id);
+
+	/*
+	* Get bank account corresponding to brokerage account
+	*/
+
+	EXEC SQL declare d21cur cursor for
+		select ACCOUNT_ID from BRACCOUNT
+			where BR_ACCOUNT_ID = :br_account_id;
+	EXEC SQL open d21cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d21cur into :account_id;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("braccount",SQLCODE),(FLDLEN)0);
+		EXEC SQL close d21cur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	
+	EXEC SQL close d21cur;
+	
+	/*
+	* Get Stock to sell
+	*/		
+	EXEC SQL declare d22cur cursor for
+		select QUANTITY, AVG_PRICE from BRHOLDING
+			where BR_ACCOUNT_ID = :br_account_id AND SYMBOL = :symbol
+			for update of QUANTITY, AVG_PRICE;
+	EXEC SQL open d22cur;
+	if (SQLCODE != SQL_OK) {
+		(void)Fchg(transf, STATUS, 0, getstr("brholding",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL fetch d22cur into :quantity, avg_price;
+	if (SQLCODE != SQL_OK) {			/* nothing found */
+		EXEC SQL close d22cur;
+		(void)Fchg(transf, STATUS, 0, getstr("brholding",SQLCODE),(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+	if (newquantity > quantity) {
+		/* Not enough Stock */
+		
+		EXEC SQL close d22cur;
+		(void)Fchg(transf, STATUS, 0, Nostock, (FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+	avg_price = (((quantity * avg_price) - (newquantity * newprice)) / (quantity - newquantity));
+	quantity = quantity - newquantity;
+	
+	EXEC SQL update BRHOLDING set QUANTITY = :quantity, AVG_PRICE = :avg_price where current of d22cur;
+	if (SQLCODE != SQL_OK) {			/* Failure to update */ 
+		(void)Fchg(transf, STATUS, 0,"Cannot update BRHOLDING for Stock sale",(FLDLEN)0); 
+		EXEC SQL close d22cur;
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	EXEC SQL close d22cur;	
+
+	/* make deposit request buffer */
+	if ((reqfb = (FBFR *)tpalloc(FMLTYPE,NULL,transb->len)) == (FBFR *)NULL) {
+		(void)userlog("tpalloc failed in transfer\n");
+		(void)Fchg(transf, STATUS, 0,
+			   "unable to allocate request buffer", (FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+	reqlen = (int)Fsizeof(reqfb);
+	(void)Finit(reqfb,(FLDLEN)reqlen);
+	
+	/* put ID in request buffer */
+	(void)Fchg(reqfb,ACCOUNT_ID,0,(char *)&account_id, (FLDLEN)0);
+
+	/* put amount in request buffer */
+	(void)Fchg(reqfb,SAMOUNT,0,amts, (FLDLEN)0);
+
+	if (tpcall("DEPOSIT", (char *)reqfb,0, (char **)&reqfb, 
+		   (long *)&reqlen,TPSIGRSTRT) == -1) {
+		if(tperrno == TPESVCFAIL && reqfb != NULL &&
+		   (s=Ffind(reqfb, STATLIN, 0, 0)) != NULL && *s)
+			(void)Fchg(transf, STATUS, 0, s, (FLDLEN)0);
+		else
+			(void)Fchg(transf, STATUS, 0, 
+			   "Cannot deposit into bank account", (FLDLEN)0);
+		EXEC SQL close d22cur;
+		tpfree((char *)reqfb);
+		tpreturn(TPFAIL, 0,transb->data, 0L, 0);
+	}
+
+	tpfree((char *)reqfb);
+	
+	sprintf(post_msg, "Account %d Sold %d %s @ %6.2f",
+		br_account_id, newquantity, symbol, newprice);	
+		
+	/* Insert history record */
+
+	volume = newquantity;
+	new_price = newprice;
+	EXEC SQL insert into BRHISTORY 
+		(BR_ACCOUNT_ID, SYMBOL, TRANSACTION, AVG_PRICE, QUANTITY) 
+		values 
+		(:br_account_id, :symbol, :transaction, :new_price, :volume);
+	if (SQLCODE != SQL_OK) {			/* Failure to insert */
+		(void)Fchg(transf, STATUS, 0, "Cannot update BRHISTORY",(FLDLEN)0);
+		tpreturn(TPFAIL, 0, transb->data, 0L, 0);
+	}
+
+    post_event("BROKER_TRANSACTION", post_msg);
+	
+	/* prepare buffer for successful return */
+
+	(void)Fchg(transf, QUANTITY, 0, (char *)&quantity,(FLDLEN)0);
+
+	tpreturn(TPSUCCESS, 0, transb->data, 0L, 0);			
+}
+
+
+static int check_delay = 0;
+static int delaying = 0;
+
+
+static void delay(long accountid) {
+	if (!check_delay) {
+		if (tuxgetenv("USEDELAY") != (char *)NULL) {
+			check_delay = delaying = 1;
+			srand48(getpid());
+		}
+	}
+	
+	if (delaying) {
+		/*
+		* Calculate delay time based on accountid
+		*/
+		int lastdigit = accountid % 10;
+		int duration = 0;
+		
+		if (lastdigit == 8) {
+			duration = 30 + (int)(30.0 * drand48());   
+		} else if (lastdigit == 9) {
+			duration = 90 + (int)(30.0 * drand48());
+		}
+	
+		if (duration) {
+#ifdef WIN32
+			Sleep(duration*1000);
+#else
+			usleep(duration*1000000);
+#endif
+		}
+	}
+}
+
+
+static void post_event(char *event, char *msg) {
+	FBFR *reqfb;
+	int reqlen;
+	char emsg[25];
+	char *timenow;
+    int ret;
+    time_t	clk_ticks ;
+    char *	timestr = NULL ;
+	
+
+	memset(emsg,0,sizeof(emsg));
+
+	if ((reqfb = (FBFR *)tpalloc(FMLTYPE, NULL, 2048)) == (FBFR *)NULL) {
+		return;
+	}
+	
+
+	reqlen = (int)Fsizeof(reqfb);
+	(void)Finit(reqfb,(FLDLEN)reqlen);
+
+	
+	Fchg(reqfb, EVENT_NAME, 0, event, (FLDLEN)0);
+    /* timenow = gettime(); */
+
+    clk_ticks = time ((time_t) 0) ;	/* get # sec since Jan 1, 1970 */
+    timestr = ctime (&clk_ticks) ;	/* conv to date-time text string */
+    (void)strtok (timestr, "\n") ;   		/* delete the '\n'  char */
+
+    /* (void)userlog ("timenow: %s", timenow); */
+    /* (void)userlog ("%s", timestr); */
+
+	Fchg(reqfb, EVENT_TIME, 0, timestr, (FLDLEN)0);
+	Fchg(reqfb, STATUS, 0, msg, (FLDLEN)0);
+#if 0
+	
+	if (tppost(event,	/* event name */
+		(char *)reqfb,	/* data */
+		0L,			/* len */
+		TPNOTRAN | TPSIGRSTRT) == -1) {
+	    /* If event broker is not reachable, ignore the error */
+	    if (tperrno != TPENOENT)
+		(void)sprintf (emsg, "tppost failed: %s", tpstrerror (tperrno));
+	}
+#endif
+
+	if (tpcall("POST_EVENT", (char *)reqfb, 0, (char **)&reqfb, (long *)&reqlen, TPSIGRSTRT) == -1)
+	{
+		if (tperrno != TPENOENT)
+			(void)sprintf(emsg, "post message failed: %s", tpstrerror(tperrno));
+	}
+
+	/* any error in processing the post event ? */
+	
+	if (strcmp (emsg, "") != 0) {
+	    (void)userlog ("WARN: Cannot Post Event %s: %s", event, emsg);
+	    (void)strcpy (emsg, "");
+	}
+	
+	tpfree((char *)reqfb);
+}
+
+
+/* End of file */

@@ -1,0 +1,67 @@
+#TMDEBUG=1-100; export TMDEBUG
+#export LMS_DUMP_STAT_METRIC=yes
+
+ORACLE_HOME=/opt/oracle_client; export ORACLE_HOME
+#  export ORA_TZFILE=$ORACLE_HOME/lib/timezone.dat
+
+ORACLE_SID=tuxdemo; export ORACLE_SID
+set NLS_LANG=AMERICAN_AMERICA.UTF8
+#
+JDK_HOME=/usr/local/jdk8; export JDK_HOME
+HADOOP_HOME=/usr/local/hadoop; export HADOOP_HOME
+
+TUXDIR=/opt/tuxedo/tuxedo12.2.2.0.0; export TUXDIR
+BASEDIR=/home/tsam/application/brokerapp; export BASEDIR
+APPDIR=$BASEDIR/$SITE; export APPDIR
+PATH=$TUXDIR/bin:$APPDIR:$BASEDIR:$ORACLE_HOME/bin:$JDK_HOME/bin:$PATH export PATH
+
+. $TUXDIR/tux.env
+
+TUXCONFIG=$APPDIR/tuxconfig; export TUXCONFIG
+BDMCONFIG=$BASEDIR/bdmconfig; export BDMCONFIG
+TMMONITOR=sys,svc,tran,app::; export TMMONITOR
+
+TLOGDEVICE=$APPDIR/TLOG; export TLOGDEVICE
+#FLDTBLDIR=$TUXDIR/udataobj:/home/tsam/application/bankapp:$BASEDIR; export FLDTBLDIR
+#  FLDTBLDIR=$TUXDIR/udataobj:$BASEDIR; export FLDTBLDIR
+#FIELDTBLS=Usysflds,bankflds,creditflds,eventflds; export FIELDTBLS
+#  FIELDTBLS=Usysflds,creditflds,eventflds
+#  export FIELDTBLS
+FIELDTBLS32=tpadm,http.fml32,Usysfl32,bankflds,creditflds,brokerflds,stockquote.fml32,stockquotes.fml32,eventflds
+export FIELDTBLS32
+FLDTBLDIR32=$TUXDIR/udataobj:$BASEDIR; export FLDTBLDIR32
+VIEWDIR=$TUXDIR/udataobj:$BASEDIR; export VIEWDIR
+VIEWFILES=aud.vv; export VIEWFILES
+ENVFILE=$BASEDIR/ENVFILE; export ENVFILE
+ULOGPFX=$BASEDIR/ULOG; export ULOGPFX
+USEDELAY=1; export USEDELAY
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$TUXDIR/lib:$TUXDIR/jre/lib/amd64/server:$JDK_HOME/jre/lib/amd64/server:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=$ORACLE_HOME/lib:/home/tsam/hadoop.bak/hadoop-2.6.0/lib/native:$TUXDIR/lib:$TUXDIR/jre/lib/amd64/server:$JDK_HOME/jre/lib/amd64/server:/home/tsam/python2.5.5/lib:/home/tsam/libxml2-2.7.8/lib:$LD_LIBRARY_PATH
+export LANG=C
+SALTCONFIG=$BASEDIR/saltconfig; export SALTCONFIG
+XSDDIR=$BASEDIR; export XSDDIR
+XSDFILES=stockquote_1.xsd; export XSDFILES
+
+WSNADDR=//$COMPUTERNAME:8610; export WSNADDR
+#export  TSAMPOLICYFILE=/home/tsam/application/policyconfig
+
+#  export PHPDIR=/home/tsam/php-embed
+#export PYTHONHOME=/home/tsam/python2.5.5
+#export PHPDIR=/home/tsam/php5.3.5_tuxpdo_oracle
+#export RUBYDIR=/home/tsam/ruby1.9.2
+#export CFLAGS="-I. -I${PHPDIR}/include/php -I${PHPDIR}/include/php/Zend -I${PHPDIR}/include/php/main -I${PHPDIR}/include/php/TSRM -I${PHPDIR}/include/php/sapi/embed"
+#export CFLAGS="-I. -I${PHPDIR}/include/php -I${PHPDIR}/include/php/Zend -I${PHPDIR}/include/php/main -I${PHPDIR}/include/php/TSRM -I${PHPDIR}/include/php/sapi/embed"
+#export LINKLIB="-L${PHPDIR}/lib -L${APACHEDIR}/lib -lphp5"
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TUXDIR/lib/oracledbclient
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TUXDIR/lib/oracledbclient:${PHPDIR}/lib:${RUBYDIR}/lib
+
+#export ANT_HOME=/home/tsam/ant-1.7.1
+export CLASSPATH=.:$TUXDIR/udataobj/tuxj/com.bea.core.jatmi_2.0.0.0.jar:$TUXDIR/udataobj/tuxj/com.oracle.tuxedo.tjatmi_12.1.1.0.jar:$ANT_HOME/lib/ant.jar
+
+#export PYTHONPATH=$TUXDIR/udataobj/salt/sca/extensions/python/module
+#export RUBYLIB=$TUXDIR/udataobj/salt/sca/extensions/ruby/module
+
+unset NLSADDR
+#  export SCA_COMPONENT=php.client
+#

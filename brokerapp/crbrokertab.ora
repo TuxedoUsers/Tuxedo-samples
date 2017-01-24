@@ -1,0 +1,20 @@
+create table BRACCOUNT (
+	BR_ACCOUNT_ID	integer not null,
+	ACCOUNT_ID	integer not null,
+	SSN	char(12) not null
+);
+
+create table BRHOLDING (
+	BR_ACCOUNT_ID	integer not null,
+	SYMBOL		char(10),
+	QUANTITY	integer not null,
+	AVG_PRICE	number
+);
+
+create table BRHISTORY (
+	BR_ACCOUNT_ID	integer not null,
+	SYMBOL		char(10),
+	TRANSACTION	char(10),
+	AVG_PRICE	number,
+	QUANTITY	integer not null
+);

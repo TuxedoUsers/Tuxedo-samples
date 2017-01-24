@@ -1,0 +1,5 @@
+create table BRACCOUNT (
+	BR_ACCOUNT_ID	integer not null,
+	ACCOUNT_ID	integer not null,
+	SSN	char(12) not null
+);

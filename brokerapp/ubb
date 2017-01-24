@@ -1,0 +1,133 @@
+#
+# UBBCONFIG file for the bankapp/brokerapp demo on the BROKER domain
+#
+# There are 3 bankapp domains and one brokerapp domain.  They are as follows:
+#
+# Dom/AP	      LDom/LAP  WSL	   JSL	   HTTP          Oracle
+#  Name		      Port	    Port   Port	   Port	  Bank   User        
+#------------------------------------------------------------------------------------------------------------------
+#   SANFRANCISCO  8300	    8310   8320	   8330	  B1     tuxdemo1
+#   CHICAGO		  8400	    8410   8420	   8430   B2     tuxdemo2
+#   NEWYORK       8500	    8510   8520	   8530   B3     tuxdemo3
+#   BROKER	      8600	    8610   8620	   8630
+#
+# TSAM dataserver:  tuxdemo:8988/tsam/dataserver
+#
+
+#
+*RESOURCES
+DOMAINID	BROKER
+IPCKEY	43194
+#PERM		0660
+MAXACCESSERS	1000
+MAXSERVERS	1000
+MAXSERVICES	1000
+MAXCONV		10
+SCANUNIT	10
+BLOCKTIME	9
+LDBAL		Y
+MODEL		MP
+MASTER		SITE1,SITE2
+DBBLWAIT	2
+OPTIONS		LAN,MIGRATE,EXT_MON
+
+
+#
+*MACHINES
+DEFAULT:
+		TUXDIR="/opt/tuxedo/tuxedo12.2.2.0.0"
+		TLOGNAME=TLOG
+		MAXWSCLIENTS=40
+
+"tuxedo.demo" LMID=SITE1
+		APPDIR="/home/tsam/application/brokerapp/site1"
+		TLOGDEVICE="/home/tsam/application/brokerapp/site1/TLOG"
+		TUXCONFIG="/home/tsam/application/brokerapp/site1/tuxconfig"
+		ULOGPFX="/home/tsam/application/brokerapp/site1/ULOG"
+
+
+"tuxedo.demo-2" LMID=SITE2
+		APPDIR="/home/tsam/application/brokerapp/site2"
+		TLOGDEVICE="/home/tsam/application/brokerapp/site2/TLOG"
+		TUXCONFIG="/home/tsam/application/brokerapp/site2/tuxconfig"
+		ULOGPFX="/home/tsam/application/brokerapp/site2/ULOG"
+
+#
+*GROUPS
+SYSGRP	LMID=SITE1 GRPNO=10
+JLTG	LMID=SITE1 GRPNO=20
+GWWSGRP	LMID=SITE1 GRPNO=30 
+GWGRP	LMID=SITE1 GRPNO=40
+#GWGRP	LMID=SITE2 GRPNO=40
+LMSGRP1	LMID=SITE1 GRPNO=50
+LMSGRP2	LMID=SITE2 GRPNO=60
+
+#  WEBGRP  LMID=SITE1 GRPNO=70
+
+DEFAULT:	TMSNAME=TMS_ORACLE	TMSCOUNT=2
+BROKER1		GRPNO=100  LMID=SITE1
+		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo1/tuxdemo1+SqlNet=tuxdemo+SesTm=0+DbgFl=15+LogDir=."
+
+BROKER2		GRPNO=110  LMID=SITE2
+		OPENINFO="Oracle_XA:Oracle_XA+Acc=P/tuxdemo1/tuxdemo1+SqlNet=tuxdemo+SesTm=0+DbgFl=15+LogDir=."
+
+#
+*NETWORK
+SITE1	NADDR="//tuxedo.demo:8641"
+        NLSADDR="//tuxedo.demo:3050"
+SITE2	NADDR="//tuxedo.demo:8642"
+        NLSADDR="//tuxedo.demo:3060"
+
+#
+*SERVERS
+DEFAULT: RESTART=Y MAXGEN=5 REPLYQ=Y CLOPT="-A"
+
+TMMETADATA SRVGRP=GWWSGRP SRVID=1000
+	CLOPT = "-A -- -f /home/tsam/application/brokerapp/metadata.rps"
+
+TMADMSVR	SRVGRP=GWWSGRP	SRVID=100
+	CLOPT="-A -- -a http://tuxedo.demo:8888"
+
+# Server "BROKER" will be replaced with Java server
+BROKER		SRVGRP=BROKER1	SRVID=1000 MIN=2 MAX=2
+BROKER		SRVGRP=BROKER2	SRVID=10 MIN=2 MAX=2
+BRACNT		SRVGRP=BROKER1	SRVID=600
+BRHOLDING	SRVGRP=BROKER1	SRVID=800
+BRHOLDING	SRVGRP=BROKER2	SRVID=30
+
+BRLIST		SRVGRP=BROKER1	SRVID=400 MIN=1 MAX=1
+
+DMADM       SRVGRP=SYSGRP   SRVID=100
+GWADM       SRVGRP=GWGRP    SRVID=300
+GWTDOMAIN   SRVGRP=GWGRP    SRVID=500
+
+TMUSREVT SRVGRP=JLTG SRVID=2000 CLOPT="-A"
+
+JSL   SRVGRP=JLTG SRVID=200
+      CLOPT="-- -n //tuxedo.demo:8620 -d /dev/tcp -m2 -M4 -x10  "
+
+#GWWS configuration
+GWWS    SRVGRP=GWWSGRP SRVID=1100
+    CLOPT="-A --  -i GW1"
+WSL	SRVGRP=GWGRP	SRVID=70
+	CLOPT="-A -- -n //tuxedo.demo:8610"
+
+#WSL	SRVGRP=GWGRP	SRVID=72
+LMS     SRVGRP=LMSGRP1  SRVID=90  
+        CLOPT="-A -o LMS.out -e LMS.err -- -l tuxedo.demo:7001/tsam -m 100m" RESTART=N
+
+LMS     SRVGRP=LMSGRP2  SRVID=90  
+        CLOPT="-A -o LMS.out -e LMS.err -- -l tuxedo.demo:7001/tsam -m 100m" RESTART=N
+#
+*SERVICES
+DEFAULT:	LOAD=50		AUTOTRAN=Y		TRANTIME=60
+BR_OPEN_ACNT	PRIO=40
+BR_CLOSE_ACNT	PRIO=40
+BR_ADD_HOLDING	PRIO=50
+BR_DEL_HOLDING	PRIO=50
+BR_BUY_STOCK	PRIO=50
+BR_WITHDRAWAL	PRIO=50
+BR_SELL_STOCK	PRIO=50
+BR_ACNT_LIST	PRIO=30
+BR_ACNT_SUM	PRIO=30
+GET_QUOTE       PRIO=30

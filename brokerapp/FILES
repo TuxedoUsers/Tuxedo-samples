@@ -1,0 +1,56 @@
+#	(c) 2007 BEA Systems, Inc. All Rights Reserved.
+
+
+Source          Generated               Purpose
+-----           ---------               -------
+BRACNT.pc       BRACNT.c        Contains BR_OPEN_ACNT and BR_CLOSE_ACNT services
+                BRACNT.o        to open anc close brokerage account.
+                BRACNT                  
+
+BRHOLDING.pc    BRHOLDING.c     Contains BR_ADD_HOLDING and BR_DEL_HOLDING services
+                BRHOLDING.o     to add and delete holdings without affecting cash balance.
+                BRHOLDING
+
+BRLIST.pc       BRLIST.c        Contains BR_ACNT_LIST and BR_ACNT_SUM services
+                BRLIST.o        to get a list of all brokerage accounts and get a detailed
+                BRLIST          summary for a specific account.
+                                
+BROKER.pc       BROKER.c        Contains BR_BUY_STOCK and BR_SELL_STOCK services
+                BROKER.o        to buy and sell stock using funds from bank account.
+                BROKER
+                
+util.pc         util.c          Contains utility code used by the servers.
+                util.o
+
+eventclt.c	eventclt	Client which subscribes to events posted by BRBROKER.
+
+Note(s):        On Windows the .o will be .obj and the executables will end in .exe
+                Also on windows there will be a .exe.manifest file per executable
+
+FILES				Descriptive list of all the files in brokerapp.
+
+README				On-line version of the installation and
+				boot procedures for UNIX and Windows
+
+appinit.c       appinit.o       Contains tpsvrinit() and tpsvrdone() for all servers
+
+brokervar                       UNIX script to set up environment for building
+
+brokervar.cmd                   Windows script to set up environment for building
+
+brokerapp.mak                   Application Makefile for Windows.
+
+brokerapp.mk                    Application Makefile for UNIX.
+
+brokerflds      brokerflds.h    Field table file containing broker database and
+                                other FML fields.
+                                
+crbroker                        UNIX script to build database tables
+
+crbroker.cmd                    Windows script to build database tables
+
+crbrokerdl1.ora                 Oracle commands to drop and build tables
+crbrokertab.ora
+
+ubbconfig                       An updated version of the sample bankapp config.
+

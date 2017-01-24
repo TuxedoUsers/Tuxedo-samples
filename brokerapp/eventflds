@@ -1,0 +1,9 @@
+#	(c) 2003 BEA Systems, Inc. All Rights Reserved.
+#Copyright (c) 1990 Unix System Laboratories, Inc.
+#All rights reserved
+#ident	"@(#) samples/atmi/bankapp/eventflds	$Revision: 1.5 $"
+
+# Fields for event processing
+# name                         number    type  flags   comments
+EVENT_NAME			401     string 	-       For use by appl
+EVENT_TIME			402	string	-	Time event posted

@@ -1,0 +1,70 @@
+
+
+############
+# SERVICE: * GetQuote
+############
+service=GetQuote
+tuxservice=GetQuote
+export=y
+servicetype=service
+servicemode=webservice
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+	param=GetQuote
+	access=in
+	paramschema=XSD_E:GetQuote@http://www.webserviceX.NET/
+	type=fml32
+	(
+		param=symbol
+		access=in
+		paramschema=XSD_E:symbol@http://www.webserviceX.NET/
+		requiredcount=0
+		count=1
+		type=string
+		primetype=string
+	)
+
+	param=GetQuoteResponse
+	access=out
+	paramschema=XSD_E:GetQuoteResponse@http://www.webserviceX.NET/
+	type=fml32
+	(
+		param=GetQuoteResult
+		access=out
+		paramschema=XSD_E:GetQuoteResult@http://www.webserviceX.NET/
+		requiredcount=0
+		count=1
+		type=string
+		primetype=string
+	)
+
+	param=TA_WS_SOAP11_FAULTCODE
+	paramschema=XSD_E:faultcode@unqualified
+	access=err
+	type=string
+
+	param=TA_WS_SOAP11_FAULTSTRING
+	paramschema=XSD_E:faultstring@unqualified
+	access=err
+	type=string
+
+	param=TA_WS_SOAP11_FAULTACTOR
+	paramschema=XSD_E:faultactor@unqualified
+	access=err
+	type=string
+	requiredcount=0
+
+	param=TA_WS_SOAP11_FAULTDETAIL
+	paramschema=XSD_E:detail@unqualified
+	access=err
+	requiredcount=0
+	type=fml32
+	(
+	param=TA_WS_SOAP_FAULTCONTENT
+	access=err
+	type=xml
+	requiredcount=0
+
+	)
+

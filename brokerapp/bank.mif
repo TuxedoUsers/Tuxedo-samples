@@ -1,0 +1,153 @@
+#
+#	Copyright (c) 2007 BEA Systems, Inc.
+#	All rights reserved
+#
+#	THIS IS UNPUBLISHED PROPRIETARY
+#	SOURCE CODE OF BEA Systems, Inc.
+#	The copyright notice above does not
+#	evidence any actual or intended
+#	publication of such source code.
+#
+#
+
+########################
+# service : WITHDRAWAL #
+########################
+service=WITHDRAWAL
+export=Y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+fieldtbls=bankflds,creditflds
+param=ACCOUNT_ID
+type=long
+access=in
+count=1
+param=SAMOUNT
+type=string
+access=inout
+count=1
+paramdescription=amount to withdraw
+param=SBALANCE
+type=string
+access=out
+count=1
+paramdescription=account balance
+
+
+#####################
+# service : DEPOSIT #
+#####################
+service=DEPOSIT
+export=Y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+fieldtbls=bankflds,creditflds
+param=ACCOUNT_ID
+type=long
+access=in
+count=1
+param=SAMOUNT
+type=string
+access=inout
+count=1
+paramdescription=amount to deposit
+param=SBALANCE
+type=string
+access=out
+count=1
+paramdescription=account balance
+param=BALANCE
+type=float
+access=out
+count=1
+paramdescription=account balance
+
+
+#####################
+# service : INQUIRY #
+#####################
+service=INQUIRY
+export=Y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+fieldtbls=bankflds,creditflds
+param=ACCOUNT_ID
+type=long
+access=in
+count=1
+param=SBALANCE
+type=string
+access=out
+count=1
+paramdescription=account balance
+
+
+#######################
+# service : OPEN_ACCT #
+#######################
+service=OPEN_ACCT
+export=Y
+servicetype=service
+inbuf=FML32
+outbuf=FML32
+errbuf=FML32
+fieldtbls=bankflds,creditflds
+
+    param=BRANCH_ID
+    type=long
+    access=in
+    count=1
+
+    param=ACCT_TYPE
+    type=char
+    access=in
+    count=1
+
+    param=SAMOUNT
+    type=string
+    access=in
+    count=1
+
+    param=LAST_NAME
+    type=string
+    access=in
+    count=1
+
+    param=FIRST_NAME
+    type=string
+    access=in
+    count=1
+
+    param=MID_INIT
+    type=char
+    access=in
+    count=1
+
+    param=ADDRESS
+    type=string
+    access=in
+    count=1
+
+    param=PHONE
+    type=string
+    access=in
+    count=1
+
+    param=SSN
+    type=string
+    access=in
+    count=1
+
+    param=ACCOUNT_ID
+    type=long
+    access=out
+    count=1
+
+    param=STATLIN
+    type=string
+    access=outerr
+    count=1
+

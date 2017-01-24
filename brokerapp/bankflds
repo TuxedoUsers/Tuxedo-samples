@@ -1,0 +1,31 @@
+#	(c) 2003 BEA Systems, Inc. All Rights Reserved.
+#Copyright (c) 1990 Unix System Laboratories, Inc.
+#All rights reserved
+#ident	"@(#) samples/atmi/bankapp/bankflds	$Revision: 1.5 $"
+
+# Fields for database bankdb
+# name                         number  type    flags   comments
+ACCOUNT_ID                     110     long    -       -       
+ACCT_TYPE                      112     char    -       -       
+ADDRESS                        109     string  -       -       
+AMOUNT                         117     float   -       -       
+BALANCE                        105     float   -       -       
+BRANCH_ID                      104     long    -       -       
+FIRST_NAME                     114     string  -       -       
+LAST_ACCT                      106     long    -       -       
+LAST_NAME                      113     string  -       -       
+LAST_TELLER                    107     long    -       -       
+MID_INIT                       115     char    -       -       
+PHONE                          108     string  -       -       
+SSN                            111     string  -       -       
+TELLER_ID                      116     long    -       -       
+#
+# non database fields
+SBALANCE                       201     string  -       used for dollar format
+SAMOUNT                        202     string  -       used for dollar format
+XA_TYPE                        203     short   -       choice in MENU mask
+CURS                           204     string  -       place holder in masks
+SVCHG                          205     string  -       -
+VIEWNAME                       206     string  -       view name
+OPEN_CR                        207     char    -       open a credit card?
+TYPE_CR                        208     char    -       type of a credit card
