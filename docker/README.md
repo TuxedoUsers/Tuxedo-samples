@@ -1,3 +1,6 @@
+# This Sample is Now Available from Oracle's Official Repository
+Please see: (https://github.com/oracle/docker-images/tree/master/OracleTuxedo)
+
 # Introduction
 This folder contains the information and examples of how to use [Tuxedo](http://oracle.com/tuxedo) with [Docker](https://www.docker.com/).
 
